@@ -1,8 +1,8 @@
 import { type GetServerSidePropsContext } from "next";
 import { getSession } from "next-auth/react";
 
-export default function ScrumBoard() {
-  return <h1>Scrum Board</h1>;
+export default function Dashboard() {
+  return <h1>Welcome To Scroom</h1>;
 }
 
 // This needs to be added to every page with current Next Auth implementation
