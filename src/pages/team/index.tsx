@@ -5,7 +5,7 @@ import { prisma } from "~/server/db";
 import UserTable from "~/components/team/UserTable";
 import type { User, Team } from "@prisma/client";
 
-export default function Team({ users, team }: { users: User[], team: Team }) {
+export default function Team({ users, team }: { users: User[]; team: Team }) {
   return (
     <>
       <h1 className="mb-4 mt-6 text-center text-4xl font-semibold tracking-wide">
@@ -28,15 +28,15 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       },
     };
   }
-  
+
   const user = await prisma.user.findUnique({
     where: {
-      id: session.user.id
-    }
-  })
+      id: session.user.id,
+    },
+  });
 
   if (!user?.teamId) {
-    return
+    return;
   }
 
   const users = await prisma.user.findMany({
@@ -45,17 +45,17 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       name: true,
       role: true,
       image: true,
-      email:true
+      email: true,
     },
     where: {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      teamId: user.teamId
-    }
+      teamId: user.teamId,
+    },
   });
 
   const team = await prisma.team.findUnique({
     select: {
-      name:true,
+      name: true,
     },
     where: {
       id: user.teamId,
@@ -63,10 +63,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   });
 
   return {
-    props: { users,team },
+    props: { users, team },
   };
 }
-
-
-
-

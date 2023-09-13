@@ -19,25 +19,25 @@ export function MoveIssueButton({
   if (issue.backlog == "product") {
     return (
       <button
-        className="rounded bg-blue-500 px-4 font-semibold text-white hover:bg-blue-600"
+        className="h-8 rounded bg-blue-500 px-4 font-semibold text-white hover:bg-blue-600"
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onClick={() =>
           updateIssue(issue.id, issue.summary, issue.status ?? "todo", "sprint")
         }
       >
-        <AiOutlineArrowUp />
+        <AiOutlineArrowUp fontSize="1.5em" />
       </button>
     );
   }
   return (
     <button
-      className="rounded bg-blue-500 px-4 font-semibold text-white hover:bg-blue-600"
+      className="h-8 rounded bg-blue-500 px-4 font-semibold text-white hover:bg-blue-600"
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       onClick={() =>
         updateIssue(issue.id, issue.summary, issue.status ?? "todo", "product")
       }
     >
-      <AiOutlineArrowDown />
+      <AiOutlineArrowDown fontSize="1.5em" />
     </button>
   );
 }
