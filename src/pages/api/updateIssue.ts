@@ -1,6 +1,5 @@
 import { prisma } from "~/server/db";
 import type { NextApiResponse } from "next";
-import type { Issue } from "@prisma/client";
 
 type RequestBody = {
   issueID: string;

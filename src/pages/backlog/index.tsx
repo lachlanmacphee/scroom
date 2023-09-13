@@ -6,19 +6,17 @@ import React, { useState } from "react";
 import { IssueItem } from "./BacklogItem";
 import type { Issue } from "@prisma/client";
 import { prisma } from "~/server/db";
-import Modal from "./addModal";
-
-interface MyPageProps {
-  sprintIssues: Issue[];
-  productIssues: Issue[];
-  teamId: string;
-}
+import UpsertModal from "./UpsertModal";
 
 export default function Backlog({
   sprintIssues,
   productIssues,
   teamId,
-}: MyPageProps) {
+}: {
+  sprintIssues: Issue[];
+  productIssues: Issue[];
+  teamId: string;
+}) {
   const [show, setShow] = useState(false);
 
   return (
@@ -39,15 +37,17 @@ export default function Backlog({
               +
             </button>
           </div>
-          <Modal onClose={() => setShow(false)} show={show} teamId={teamId} />
+          <UpsertModal
+            onClose={() => setShow(false)}
+            show={show}
+            teamId={teamId}
+          />
         </div>
         <div className="page border border-solid border-blue-500 px-10 py-10">
           {sprintIssues
             .sort((a, b) => a.id.localeCompare(b.id))
-            .map((issue, index) => (
-              <div className="dropped-issue" key={index}>
-                <IssueItem issue={issue} />
-              </div>
+            .map((issue) => (
+              <IssueItem issue={issue} key={issue.id} />
             ))}
         </div>
 
@@ -65,10 +65,8 @@ export default function Backlog({
         <div className="page border border-solid border-red-500 px-10 py-10">
           {productIssues
             .sort((a, b) => a.id.localeCompare(b.id))
-            .map((issue, index) => (
-              <div className="dropped-issue" key={index}>
-                <IssueItem issue={issue} />
-              </div>
+            .map((issue) => (
+              <IssueItem issue={issue} key={issue.id} />
             ))}
         </div>
       </main>
