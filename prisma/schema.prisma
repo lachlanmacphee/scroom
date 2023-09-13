@@ -39,6 +39,9 @@ model Session {
 model User {
     id            String    @id @default(cuid())
     name          String?
+    teamId        String?
+    team          Team?     @relation(fields: [teamId], references: [id])
+    role          String?
     email         String?   @unique
     emailVerified DateTime?
     image         String?
@@ -47,9 +50,26 @@ model User {
 }
 
 model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
+    identifier   String
+    token        String     @unique
+    expires      DateTime
 
     @@unique([identifier, token])
+}
+
+model Team {
+    id           String    @id @default(cuid())
+    name         String
+    projectName  String
+    users        User[]
+    issues       Issue[]
+}
+
+model Issue {
+    id            String    @id @default(cuid())
+    status        String?
+    backlog       String
+    summary       String
+    teamId        String   
+    team          Team      @relation(fields: [teamId], references: [id])   
 }
