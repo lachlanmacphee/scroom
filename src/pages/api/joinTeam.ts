@@ -28,7 +28,8 @@ export default async function handleJoinTeam(req: ExtendNextApiRequest, res: Nex
           id: userId 
       },
       data: {
-        teamId: teamCode
+        teamId: teamCode,
+        role: "guest"
       },
     });
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
