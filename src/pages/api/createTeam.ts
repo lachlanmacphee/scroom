@@ -29,7 +29,8 @@ export default async function handleCreateTeam(req: ExtendNextApiRequest, res: N
         id: userId 
     },
     data: {
-      teamId: team.id
+      teamId: team.id,
+      role: "admin" 
     },
   });
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call

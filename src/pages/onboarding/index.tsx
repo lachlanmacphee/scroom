@@ -47,16 +47,20 @@ export default function Home() {
 
   return (
     <>
-      <title className=" flex justify-center py-10 text-center text-5xl font-extrabold text-slate-600 ">
-        Welcome to SCROOM!
-      </title>
-      <sub className="flex justify-center text-center text-3xl font-bold text-slate-400">
-        Would you like to join an existing team or create a new team
-      </sub>
-      <main className="flex h-screen flex-grow flex-row items-center justify-center gap-10 self-center p-4">
+      <div className="flex flex-grow justify-center bg-white py-16 dark:bg-slate-700 ">
+      <div className="flex flex-col items-center">
+        <h1 className="mb-4 text-center text-4xl font-extrabold leading-none tracking-tight text-gray-900 dark:text-white md:text-5xl lg:text-6xl">
+          Welcome to scroom!
+        </h1>
+        <p className="mb-6 text-center text-lg font-normal text-gray-500 dark:text-gray-400 sm:px-16 lg:text-xl xl:px-48">
+        Would you like to join an existing team or create a new team?
+        </p>
+        <div className="flex gap-16">
         <JoinTeam handleJoinTeamSubmit={handleJoinTeamSubmit} />
         <NewTeam handleNewTeamSubmit={handleNewTeamSubmit} />
-      </main>
+        </div>
+      </div>
+    </div>
     </>
   );
 }
