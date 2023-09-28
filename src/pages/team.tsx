@@ -1,16 +1,36 @@
 import { type GetServerSidePropsContext } from "next";
 import { getSession } from "next-auth/react";
-import React from "react";
+import React, { useState } from "react";
 import { prisma } from "~/server/db";
 import UserTable from "~/components/team/UserTable";
 import type { User, Team } from "@prisma/client";
+import { HiOutlinePencil } from "react-icons/hi";
+import TeamDetailsModal from "~/components/team/TeamDetailsModal";
 
 export default function Team({ users, team }: { users: User[]; team: Team }) {
+  const [isTeamDetailsModalOpen, setIsTeamDetailsModalOpen] = useState(false);
   return (
     <>
-      <h1 className="mb-4 mt-6 text-center text-4xl font-semibold tracking-wide">
-        {team.name}
-      </h1>
+      {isTeamDetailsModalOpen && (
+        <TeamDetailsModal
+          onClose={() => setIsTeamDetailsModalOpen(false)}
+          team={team}
+        />
+      )}
+
+      <div className="mb-4 mt-6 flex items-center justify-center gap-3">
+        <div className="text-center">
+          <h1 className="text-4xl font-semibold tracking-wide">{team.name}</h1>
+          <h2 className=" text-3xl tracking-wide">{team.projectName}</h2>
+        </div>
+
+        <button
+          data-testid="editTeamDetailsButton"
+          onClick={() => setIsTeamDetailsModalOpen(true)}
+        >
+          <HiOutlinePencil fontSize="1.75em" />
+        </button>
+      </div>
       <UserTable users={users} />
     </>
   );
@@ -55,7 +75,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   const team = await prisma.team.findUnique({
     select: {
+      id: true,
       name: true,
+      projectName: true,
     },
     where: {
       id: user.teamId,

@@ -9,7 +9,7 @@ type updateIssue = (
   backlog: string,
 ) => void;
 
-export function MoveIssueButton({
+export default function MoveIssueButton({
   updateIssue,
   issue,
 }: {
@@ -20,7 +20,6 @@ export function MoveIssueButton({
     return (
       <button
         className="h-8 rounded bg-blue-500 px-4 font-semibold text-white hover:bg-blue-600"
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onClick={() =>
           updateIssue(issue.id, issue.summary, issue.status ?? "todo", "sprint")
         }
@@ -32,7 +31,6 @@ export function MoveIssueButton({
   return (
     <button
       className="h-8 rounded bg-blue-500 px-4 font-semibold text-white hover:bg-blue-600"
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       onClick={() =>
         updateIssue(issue.id, issue.summary, issue.status ?? "todo", "product")
       }
