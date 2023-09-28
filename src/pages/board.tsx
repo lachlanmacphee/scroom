@@ -3,20 +3,20 @@ import { type GetServerSidePropsContext } from "next";
 import { getSession } from "next-auth/react";
 import type { Issue, Team } from "@prisma/client";
 import { prisma } from "~/server/db";
-import IssueComp from "~/components/IssueComp";
+import IssueComp from "~/components/backlog/IssueComp";
 
 export default function ScrumBoard({
-  issue,
+  issues,
   team,
 }: {
-  issue: Issue[];
+  issues: Issue[];
   team: Team;
 }) {
-  const todoIssues = issue.filter((issue) => issue.status === "toDo");
-  const inProgressIssues = issue.filter(
+  const todoIssues = issues?.filter((issue) => issue.status === "toDo");
+  const inProgressIssues = issues?.filter(
     (issue) => issue.status === "inProgress",
   );
-  const doneIssues = issue.filter((issue) => issue.status === "done");
+  const doneIssues = issues?.filter((issue) => issue.status === "done");
 
   return (
     <>
@@ -46,10 +46,13 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     };
   }
 
-  const issue = await prisma.issue.findMany({
+  const issues = await prisma.issue.findMany({
     select: {
       summary: true,
       status: true,
+    },
+    where: {
+      backlog: "sprint",
     },
   });
 
@@ -72,6 +75,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   });
 
   return {
-    props: { issue, team },
+    props: { issues, team },
   };
 }

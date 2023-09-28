@@ -1,12 +1,8 @@
 import { type ReactNode } from "react";
 import Head from "next/head";
-import Navbar from "./navbar";
+import Navbar from "./Navbar";
 
-interface Props {
-  children: ReactNode;
-}
-
-export default function Layout({ children }: Props) {
+export default function Layout({ children }: { children: ReactNode }) {
   return (
     <>
       <Head>
