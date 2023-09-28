@@ -14,3 +14,8 @@ test("changing team and project name works", async ({ page }) => {
   await expect(page.getByText("RevisedTeam")).toBeVisible();
   await expect(page.getByText("RevisedProject")).toBeVisible();
 });
+
+test("admin can see role dropdowns", async ({ page }) => {
+  await page.goto("/team");
+  await expect(page.getByTestId("roleSelectDropdown")).toBeVisible();
+});

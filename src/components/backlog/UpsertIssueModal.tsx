@@ -53,6 +53,7 @@ export default function UpsertIssueModal({
               className="w-3/4 rounded-md border border-gray-900"
               type="text"
               name="summary"
+              data-testid="summary"
               defaultValue={issue?.summary ?? ""}
               required
             />

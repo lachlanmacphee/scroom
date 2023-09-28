@@ -2,7 +2,7 @@
 import { type GetServerSidePropsContext } from "next";
 import { getSession } from "next-auth/react";
 import React, { useState } from "react";
-import IssueItem from "~/components/backlog/BacklogItem";
+import IssueItem from "~/components/backlog/IssueItem";
 import UpsertModal from "~/components/backlog/UpsertIssueModal";
 import type { Issue } from "@prisma/client";
 import { prisma } from "~/server/db";
@@ -11,10 +11,12 @@ export default function Backlog({
   sprintIssues,
   productIssues,
   teamId,
+  role,
 }: {
   sprintIssues: Issue[];
   productIssues: Issue[];
   teamId: string;
+  role: string;
 }) {
   const [show, setShow] = useState(false);
 
@@ -26,6 +28,7 @@ export default function Backlog({
         <div className="relative flex-auto">
           <button
             className="absolute right-2 top-0 rounded-full bg-gray-800 px-4 py-2  text-white shadow-lg"
+            data-testid="addSprintIssueButton"
             onClick={() => setShow(true)}
           >
             +
@@ -36,7 +39,7 @@ export default function Backlog({
         {sprintIssues
           .sort((a, b) => a.id.localeCompare(b.id))
           .map((issue) => (
-            <IssueItem issue={issue} key={issue.id} />
+            <IssueItem issue={issue} key={issue.id} role={role} />
           ))}
       </div>
 
@@ -45,6 +48,7 @@ export default function Backlog({
         <div className="relative flex-auto">
           <button
             className="absolute right-2 top-0 rounded-full bg-gray-800 px-4 py-2  text-white shadow-lg"
+            data-testid="addProductIssueButton"
             onClick={() => setShow(true)}
           >
             +
@@ -55,15 +59,13 @@ export default function Backlog({
         {productIssues
           .sort((a, b) => a.id.localeCompare(b.id))
           .map((issue) => (
-            <IssueItem issue={issue} key={issue.id} />
+            <IssueItem issue={issue} key={issue.id} role={role} />
           ))}
       </div>
     </>
   );
 }
 
-// This needs to be added to every page with current Next Auth implementation
-// Middleware is not supported for database sessions
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getSession(context);
 
@@ -75,13 +77,12 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     };
   }
 
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-  });
-  if (!user?.teamId) {
-    return;
+  if (!session.user?.teamId) {
+    return {
+      redirect: {
+        destination: "/onboarding",
+      },
+    };
   }
 
   const sprintIssues = await prisma.issue.findMany({
@@ -93,7 +94,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       teamId: true,
     },
     where: {
-      teamId: user.teamId,
+      teamId: session.user.teamId,
       backlog: "sprint",
     },
   });
@@ -107,18 +108,17 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       teamId: true,
     },
     where: {
-      teamId: user.teamId,
+      teamId: session.user.teamId,
       backlog: "product",
     },
   });
-
-  const teamId = user.teamId;
 
   return {
     props: {
       sprintIssues,
       productIssues,
-      teamId,
+      teamId: session.user.teamId,
+      role: session.user.role,
     },
   };
 }

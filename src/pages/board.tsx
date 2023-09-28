@@ -56,13 +56,12 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     },
   });
 
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-  });
-  if (!user?.teamId) {
-    return;
+  if (!session.user?.teamId) {
+    return {
+      redirect: {
+        destination: "/onboarding",
+      },
+    };
   }
 
   const team = await prisma.team.findUnique({
@@ -70,7 +69,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       projectName: true,
     },
     where: {
-      id: user.teamId,
+      id: session.user.teamId,
     },
   });
 

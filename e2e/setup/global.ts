@@ -6,10 +6,10 @@ import { prisma } from "~/server/db";
 type Cookie = Parameters<BrowserContext["addCookies"]>[0][0];
 const testCookie: Cookie = {
   name: "next-auth.session-token",
-  value: "d52f0c50-b8e3-4326-b48c-4d4a66fdeb64",
+  value: "d52f0c50-b8e3-4326-b48c-4d4a66fdeb64", // some random id
   domain: "localhost",
   path: "/",
-  expires: -1,
+  expires: -1, // expired => forces browser to refresh cookie on test run
   httpOnly: true,
   secure: false,
   sameSite: "Lax",
@@ -18,18 +18,6 @@ const testCookie: Cookie = {
 export default async function globalSetup() {
   const now = new Date();
 
-  await prisma.team.upsert({
-    where: {
-      id: "octocattestteam",
-    },
-    create: {
-      id: "octocattestteam",
-      name: "Octocat's Team",
-      projectName: "Octocat's Project",
-    },
-    update: {},
-  });
-
   await prisma.user.upsert({
     where: {
       email: "octocat@github.com",
@@ -37,6 +25,8 @@ export default async function globalSetup() {
     create: {
       name: "Octocat",
       email: "octocat@github.com",
+      teamId: "1",
+      role: "admin",
       image: "https://github.com/octocat.png",
       sessions: {
         create: {
@@ -54,13 +44,13 @@ export default async function globalSetup() {
           scope: "email identify",
         },
       },
-      role: "admin",
-      teamId: "octocattestteam",
     },
-    update: {},
+    update: {
+      role: "productOwner",
+    },
   });
 
-  const storageState = path.resolve(__dirname, "storage-state.json");
+  const storageState = path.resolve(__dirname, "storageState.json");
   const browser = await chromium.launch();
   const context = await browser.newContext({ storageState });
   await context.addCookies([testCookie]);

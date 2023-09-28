@@ -1,31 +1,39 @@
 import { prisma } from "~/server/db";
-import type { NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "~/server/auth";
 
-type RequestBody = {
-  issueID: string;
-  summary: string;
-  status: string;
-  backlog: string;
-};
-
-type RequestData = {
-  body: RequestBody;
-};
+interface ExtendNextApiRequest extends NextApiRequest {
+  body: {
+    issueID: string;
+    summary: string;
+    status: string;
+    backlog: string;
+  };
+}
 
 export default async function handleUpdateIssue(
-  req: RequestData,
+  req: ExtendNextApiRequest,
   res: NextApiResponse,
 ) {
+  const session = await getServerSession(req, res, authOptions);
   const { issueID, status, summary, backlog } = req.body;
-  const issue = await prisma.issue.update({
-    where: {
-      id: issueID,
-    },
-    data: {
-      status: status,
-      summary: summary,
-      backlog: backlog,
-    },
-  });
-  res.json(issue);
+
+  if (backlog && session?.user.role !== "productOwner") {
+    res.status(401);
+  } else {
+    const issue = await prisma.issue.update({
+      where: {
+        id: issueID,
+      },
+      data: {
+        status: status,
+        summary: summary,
+        backlog: backlog,
+      },
+    });
+    res.json(issue);
+  }
+
+  res.end();
 }

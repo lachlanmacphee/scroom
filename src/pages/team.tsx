@@ -7,7 +7,15 @@ import type { User, Team } from "@prisma/client";
 import { HiOutlinePencil } from "react-icons/hi";
 import TeamDetailsModal from "~/components/team/TeamDetailsModal";
 
-export default function Team({ users, team }: { users: User[]; team: Team }) {
+export default function Team({
+  role,
+  users,
+  team,
+}: {
+  role: string;
+  users: User[];
+  team: Team;
+}) {
   const [isTeamDetailsModalOpen, setIsTeamDetailsModalOpen] = useState(false);
   return (
     <>
@@ -24,14 +32,16 @@ export default function Team({ users, team }: { users: User[]; team: Team }) {
           <h2 className=" text-3xl tracking-wide">{team.projectName}</h2>
         </div>
 
-        <button
-          data-testid="editTeamDetailsButton"
-          onClick={() => setIsTeamDetailsModalOpen(true)}
-        >
-          <HiOutlinePencil fontSize="1.75em" />
-        </button>
+        {role === "admin" && (
+          <button
+            data-testid="editTeamDetailsButton"
+            onClick={() => setIsTeamDetailsModalOpen(true)}
+          >
+            <HiOutlinePencil fontSize="1.75em" />
+          </button>
+        )}
       </div>
-      <UserTable users={users} />
+      <UserTable users={users} role={role} />
     </>
   );
 }
@@ -49,14 +59,12 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     };
   }
 
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-  });
-
-  if (!user?.teamId) {
-    return;
+  if (!session.user?.teamId) {
+    return {
+      redirect: {
+        destination: "/onboarding",
+      },
+    };
   }
 
   const users = await prisma.user.findMany({
@@ -68,8 +76,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       email: true,
     },
     where: {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      teamId: user.teamId,
+      teamId: session.user.teamId,
     },
   });
 
@@ -80,11 +87,11 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       projectName: true,
     },
     where: {
-      id: user.teamId,
+      id: session.user.teamId,
     },
   });
 
   return {
-    props: { users, team },
+    props: { role: session.user.role, users, team },
   };
 }

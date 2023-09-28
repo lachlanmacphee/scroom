@@ -20,6 +20,7 @@ export default function MoveIssueButton({
     return (
       <button
         className="h-8 rounded bg-blue-500 px-4 font-semibold text-white hover:bg-blue-600"
+        data-testid="moveIssueButton"
         onClick={() =>
           updateIssue(issue.id, issue.summary, issue.status ?? "todo", "sprint")
         }
@@ -31,6 +32,7 @@ export default function MoveIssueButton({
   return (
     <button
       className="h-8 rounded bg-blue-500 px-4 font-semibold text-white hover:bg-blue-600"
+      data-testid="moveIssueButton"
       onClick={() =>
         updateIssue(issue.id, issue.summary, issue.status ?? "todo", "product")
       }
