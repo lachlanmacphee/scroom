@@ -5,17 +5,17 @@ import { type Issue } from "@prisma/client";
 import Link from "next/link";
 
 export default function Dashboard({
-  userName,
+  username,
   recentIssues,
 }: {
-  userName: string;
+  username: string;
   recentIssues: Issue[];
 }) {
   return (
     <div className="flex flex-grow justify-center bg-white px-48 py-48 dark:bg-slate-700 ">
       <div className="flex flex-col items-center">
         <h1 className="mb-4 text-center text-4xl font-extrabold leading-none tracking-tight text-gray-900 dark:text-white md:text-5xl lg:text-6xl">
-          Welcome back to scroom, {userName}
+          Welcome back to scroom, {username}
         </h1>
         <p className="mb-6 text-center text-lg font-normal text-gray-500 dark:text-gray-400 sm:px-16 lg:text-xl xl:px-48">
           Use the navigation options above to visit your team&apos;s scrum
@@ -44,8 +44,6 @@ export default function Dashboard({
   );
 }
 
-// This needs to be added to every page with current Next Auth implementation
-// Middleware is not supported for database sessions
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getSession(context);
 
@@ -56,13 +54,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       },
     };
   }
-  const currentUser = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-  });
 
-  if (currentUser?.teamId === null) {
+  if (!session.user?.teamId) {
     return {
       redirect: {
         destination: "/onboarding",
@@ -70,21 +63,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     };
   }
 
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-  });
-
-  if (!user?.teamId) {
-    return {
-      props: { userName: session.user.name },
-    };
-  }
-
   const recentIssues = await prisma.issue.findMany({
     where: {
-      teamId: user.teamId,
+      teamId: session.user.teamId,
     },
     select: {
       id: true,
@@ -94,6 +75,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   });
 
   return {
-    props: { userName: session.user.name, recentIssues: recentIssues },
+    props: { username: session.user.name, recentIssues: recentIssues },
   };
 }

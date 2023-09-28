@@ -1,5 +1,7 @@
 import { prisma } from "~/server/db";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { getServerSession } from "next-auth";
+import { authOptions } from "~/server/auth";
 
 interface ExtendNextApiRequest extends NextApiRequest {
   body: {
@@ -13,16 +15,23 @@ export default async function handleUpdateTeam(
   req: ExtendNextApiRequest,
   res: NextApiResponse,
 ) {
+  const session = await getServerSession(req, res, authOptions);
   const { id, name, projectName } = req.body;
-  const result = await prisma.team.update({
-    data: {
-      name: name,
-      projectName: projectName,
-    },
-    where: {
-      id: id,
-    },
-  });
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-  res.json(result);
+
+  if (session?.user.role !== "admin") {
+    res.status(401);
+  } else {
+    const result = await prisma.team.update({
+      data: {
+        name: name,
+        projectName: projectName,
+      },
+      where: {
+        id: id,
+      },
+    });
+    res.json(result);
+  }
+
+  res.end();
 }

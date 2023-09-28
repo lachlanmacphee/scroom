@@ -1,8 +1,17 @@
 import UserRow from "~/components/team/UserRow";
 import React from "react";
 import type { User } from "@prisma/client";
+import { useRouter } from "next/router";
 
-export default function UserTable({ users }: { users: User[] }) {
+export default function UserTable({
+  users,
+  role,
+}: {
+  users: User[];
+  role: string;
+}) {
+  const router = useRouter();
+
   const handleRoleChange = async (id: string, newRole: string) => {
     try {
       const body = { id, newRole };
@@ -11,6 +20,7 @@ export default function UserTable({ users }: { users: User[] }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
+      await router.replace(router.asPath);
     } catch (error) {
       console.error("Error updating role:", error);
     }
@@ -31,6 +41,7 @@ export default function UserTable({ users }: { users: User[] }) {
             key={user.id}
             user={user}
             handleRoleChange={handleRoleChange}
+            role={role}
           />
         ))}
     </div>
