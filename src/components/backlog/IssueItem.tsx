@@ -66,7 +66,7 @@ export default function IssueItem({
           className="h-8 rounded bg-blue-500 px-4 font-semibold text-white hover:bg-blue-600"
           onClick={() => editHandler()}
         >
-          <FiEdit fontSize="1.5em" />
+          <FiEdit size="1.5em" />
         </button>
       </div>
     </>
