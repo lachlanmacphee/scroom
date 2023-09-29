@@ -23,7 +23,7 @@ export default function UserRow({ user, handleRoleChange, role }: userProps) {
   }
 
   return (
-    <div className="flex justify-between border px-16 py-2">
+    <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3 shadow dark:border-gray-700 dark:bg-gray-800">
       <div className="flex items-center gap-4">
         <Image
           className="rounded-full"
@@ -33,13 +33,14 @@ export default function UserRow({ user, handleRoleChange, role }: userProps) {
           height="50"
         />
         <div>
-          <p>{user.name}</p>
-          <p className="text-xs font-thin">{user.email}</p>
+          <p className="dark:text-white">{user.name}</p>
+          <p className="text-xs font-light dark:text-gray-400">{user.email}</p>
         </div>
       </div>
       {role === "admin" && (
         <select
           defaultValue={user.role}
+          className="rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
           onChange={(e) => clickHandler(e.target.value)}
           data-testid="roleSelectDropdown"
         >

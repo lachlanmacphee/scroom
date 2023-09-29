@@ -18,17 +18,21 @@ export default function Team({
 }) {
   const isAdmin = role === "admin";
   return (
-    <>
+    <div className="flex flex-grow flex-col bg-white px-8 dark:bg-slate-700 ">
       <div className="mb-4 mt-6 flex items-center justify-center gap-3">
         <div className="text-center">
-          <h1 className="text-4xl font-semibold tracking-wide">{team.name}</h1>
-          <h2 className=" text-3xl tracking-wide">{team.projectName}</h2>
+          <h1 className="text-4xl font-semibold tracking-wide dark:text-white">
+            {team.name}
+          </h1>
+          <h2 className=" text-3xl tracking-wide dark:text-gray-400">
+            {team.projectName}
+          </h2>
         </div>
         {isAdmin && <TeamDetailsButton team={team} />}
         {isAdmin && <ResetTeamButton team={team} />}
       </div>
       <UserTable users={users} role={role} />
-    </>
+    </div>
   );
 }
 

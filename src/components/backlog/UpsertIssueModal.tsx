@@ -9,10 +9,12 @@ export default function UpsertIssueModal({
   onClose,
   issue,
   teamId,
+  backlog,
 }: {
   onClose: onClose;
   issue?: Issue;
   teamId?: string;
+  backlog?: string;
 }) {
   const router = useRouter();
 
@@ -77,7 +79,7 @@ export default function UpsertIssueModal({
               name="backlog"
               id="backlog"
               className="w-3/4 rounded-md border border-gray-900"
-              defaultValue={issue?.backlog ?? "product"}
+              defaultValue={issue?.backlog ?? backlog}
             >
               <option value="sprint">Sprint Backlog</option>
               <option value="product">Product Backlog</option>
