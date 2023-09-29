@@ -21,7 +21,7 @@ export default function Navbar() {
             onClick={() => void signOut()}
             className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700  dark:text-gray-200 "
           >
-            <TbLogout2 fontSize="2em" />
+            <TbLogout2 size="2em" />
           </button>
           {session?.user?.image && (
             <Image

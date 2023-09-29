@@ -25,7 +25,7 @@ export default function MoveIssueButton({
           updateIssue(issue.id, issue.summary, issue.status ?? "todo", "sprint")
         }
       >
-        <AiOutlineArrowUp fontSize="1.5em" />
+        <AiOutlineArrowUp size="1.5em" />
       </button>
     );
   }
@@ -37,7 +37,7 @@ export default function MoveIssueButton({
         updateIssue(issue.id, issue.summary, issue.status ?? "todo", "product")
       }
     >
-      <AiOutlineArrowDown fontSize="1.5em" />
+      <AiOutlineArrowDown size="1.5em" />
     </button>
   );
 }

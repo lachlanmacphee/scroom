@@ -5,7 +5,7 @@ test("edit icon appears", async ({ page }) => {
   await expect(page.getByTestId("editTeamDetailsButton")).toBeVisible();
 });
 
-test("changing team and project name works", async ({ page }) => {
+test("changing team and project name", async ({ page }) => {
   await page.goto("/team");
   await page.getByTestId("editTeamDetailsButton").click();
   await page.getByTestId("teamNameField").fill("RevisedTeam");
@@ -18,4 +18,12 @@ test("changing team and project name works", async ({ page }) => {
 test("admin can see role dropdowns", async ({ page }) => {
   await page.goto("/team");
   await expect(page.getByTestId("roleSelectDropdown")).toBeVisible();
+});
+
+test("reset button enables once input field correct", async ({ page }) => {
+  await page.goto("/team");
+  await page.getByTestId("resetTeamButton").click();
+  await expect(page.getByTestId("resetTeamButton")).toBeDisabled();
+  await page.getByTestId("resetConfirmField").fill("reset");
+  await expect(page.getByTestId("resetTeamButton")).toBeEnabled();
 });
