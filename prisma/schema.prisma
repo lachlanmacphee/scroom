@@ -47,29 +47,34 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+    issues        Issue[]
 }
 
 model VerificationToken {
-    identifier   String
-    token        String     @unique
-    expires      DateTime
+    identifier String
+    token      String   @unique
+    expires    DateTime
 
     @@unique([identifier, token])
 }
 
 model Team {
-    id           String    @id @default(cuid())
-    name         String
-    projectName  String
-    users        User[]
-    issues       Issue[]
+    id          String  @id @default(cuid())
+    name        String
+    projectName String
+    users       User[]
+    issues      Issue[]
 }
 
 model Issue {
-    id            String    @id @default(cuid())
-    status        String?
-    backlog       String
-    summary       String
-    teamId        String   
-    team          Team      @relation(fields: [teamId], references: [id])   
+    id       String  @id @default(cuid())
+    status   String?
+    backlog  String
+    summary  String
+    teamId   String
+    estimate Int?
+    type     String?
+    userId   String?
+    assignee User?   @relation(fields: [userId], references: [id])
+    team     Team    @relation(fields: [teamId], references: [id])
 }
