@@ -30,7 +30,7 @@ export default function TeamDetailsButton({ team }: { team: Team }) {
         data-testid="editTeamDetailsButton"
         onClick={() => setIsTeamDetailsModalOpen(true)}
       >
-        <HiOutlinePencil size="1.75em" />
+        <HiOutlinePencil size="1.75em" className="dark:stroke-white" />
       </button>
       {isTeamDetailsModalOpen && (
         <Modal

@@ -16,7 +16,7 @@ services:
     container_name: pgadmin4_container
     restart: always
     ports:
-      - "8888:80"
+      - "80:80"
     environment:
       PGADMIN_DEFAULT_EMAIL: yourcode@student.monash.edu
       PGADMIN_DEFAULT_PASSWORD: scrum

@@ -27,7 +27,7 @@ export default function UserTable({
   };
 
   return (
-    <div className="min-w-full overflow-hidden rounded-lg bg-white text-black">
+    <>
       {users
         .sort((a, b) => {
           if (a.name && b.name) {
@@ -44,6 +44,6 @@ export default function UserTable({
             role={role}
           />
         ))}
-    </div>
+    </>
   );
 }

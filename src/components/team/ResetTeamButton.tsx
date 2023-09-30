@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/router";
 import Modal from "../common/Modal";
 import { type Team } from "@prisma/client";
-import { GrPowerReset } from "react-icons/gr";
+import { FiRotateCcw } from "react-icons/fi";
 
 export default function ResetTeamButton({ team }: { team: Team }) {
   const router = useRouter();
@@ -35,7 +35,7 @@ export default function ResetTeamButton({ team }: { team: Team }) {
         data-testid="resetTeamButton"
         onClick={() => setIsResetModalOpen(true)}
       >
-        <GrPowerReset size="1.75em" />
+        <FiRotateCcw size="1.75em" className="dark:stroke-white" />
       </button>
       {isResetModalOpen && (
         <Modal title="Confirm Team Reset" onClose={handleClose}>

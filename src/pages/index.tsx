@@ -27,7 +27,7 @@ export default function Dashboard({
         </h1>
         {recentIssues ? (
           recentIssues.map((issue) => (
-            <span key={issue.id} className="text-white">
+            <span key={issue.id} className="dark:text-white">
               {issue.summary}
             </span>
           ))

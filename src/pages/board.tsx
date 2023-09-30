@@ -3,7 +3,7 @@ import { type GetServerSidePropsContext } from "next";
 import { getSession } from "next-auth/react";
 import type { Issue, Team } from "@prisma/client";
 import { prisma } from "~/server/db";
-import IssueComp from "~/components/backlog/IssueComp";
+import IssueComp from "~/components/board/IssueComp";
 
 export default function ScrumBoard({
   issues,
@@ -19,10 +19,10 @@ export default function ScrumBoard({
   const doneIssues = issues?.filter((issue) => issue.status === "done");
 
   return (
-    <>
+    <div className="flex flex-grow flex-col bg-white dark:bg-slate-700">
       <div className="py-4 text-center">
-        <h1 className="text-3xl font-bold">Scrum Board</h1>
-        <h2 className="text-lg font-semibold text-gray-600">
+        <h1 className="text-3xl font-bold dark:text-white">Scrum Board</h1>
+        <h2 className="text-lg font-semibold text-gray-600 dark:text-gray-400">
           {team.projectName}, Sprint 0
         </h2>
       </div>
@@ -31,7 +31,7 @@ export default function ScrumBoard({
         <IssueComp issues={inProgressIssues} status="IN PROGRESS" />
         <IssueComp issues={doneIssues} status="DONE" />
       </div>
-    </>
+    </div>
   );
 }
 

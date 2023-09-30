@@ -1,68 +1,23 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { type GetServerSidePropsContext } from "next";
 import { getSession } from "next-auth/react";
-import React, { useState } from "react";
-import IssueItem from "~/components/backlog/IssueItem";
-import UpsertModal from "~/components/backlog/UpsertIssueModal";
+import React from "react";
 import type { Issue } from "@prisma/client";
 import { prisma } from "~/server/db";
+import BacklogSection from "~/components/backlog/BacklogSection";
 
 export default function Backlog({
   sprintIssues,
   productIssues,
-  teamId,
-  role,
 }: {
   sprintIssues: Issue[];
   productIssues: Issue[];
-  teamId: string;
-  role: string;
 }) {
-  const [show, setShow] = useState(false);
-
   return (
-    <>
-      {show && <UpsertModal onClose={() => setShow(false)} teamId={teamId} />}
-      <div className="m-5 flex flex-row">
-        <div className="flex-auto text-lg">Sprint Backlog</div>
-        <div className="relative flex-auto">
-          <button
-            className="absolute right-2 top-0 rounded-full bg-gray-800 px-4 py-2  text-white shadow-lg"
-            data-testid="addSprintIssueButton"
-            onClick={() => setShow(true)}
-          >
-            +
-          </button>
-        </div>
-      </div>
-      <div className="page border border-solid border-blue-500 px-10 py-10">
-        {sprintIssues
-          .sort((a, b) => a.id.localeCompare(b.id))
-          .map((issue) => (
-            <IssueItem issue={issue} key={issue.id} role={role} />
-          ))}
-      </div>
-
-      <div className="m-5 flex flex-row">
-        <div className="flex-auto text-lg">Product Backlog</div>
-        <div className="relative flex-auto">
-          <button
-            className="absolute right-2 top-0 rounded-full bg-gray-800 px-4 py-2  text-white shadow-lg"
-            data-testid="addProductIssueButton"
-            onClick={() => setShow(true)}
-          >
-            +
-          </button>
-        </div>
-      </div>
-      <div className="page border border-solid border-red-500 px-10 py-10">
-        {productIssues
-          .sort((a, b) => a.id.localeCompare(b.id))
-          .map((issue) => (
-            <IssueItem issue={issue} key={issue.id} role={role} />
-          ))}
-      </div>
-    </>
+    <div className="flex flex-grow flex-col bg-white dark:bg-slate-700">
+      <BacklogSection issues={sprintIssues} backlog="sprint" />
+      <BacklogSection issues={productIssues} backlog="product" />
+    </div>
   );
 }
 
@@ -97,6 +52,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       teamId: session.user.teamId,
       backlog: "sprint",
     },
+    orderBy: {
+      summary: "asc",
+    },
   });
 
   const productIssues = await prisma.issue.findMany({
@@ -111,14 +69,15 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       teamId: session.user.teamId,
       backlog: "product",
     },
+    orderBy: {
+      summary: "asc",
+    },
   });
 
   return {
     props: {
       sprintIssues,
       productIssues,
-      teamId: session.user.teamId,
-      role: session.user.role,
     },
   };
 }

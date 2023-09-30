@@ -4,18 +4,12 @@ import { useRouter } from "next/router";
 import { FiEdit } from "react-icons/fi";
 import MoveIssueButton from "./MoveIssueButton";
 import UpsertModal from "./UpsertIssueModal";
+import { useSession } from "next-auth/react";
 
-export default function IssueItem({
-  issue,
-  role,
-}: {
-  issue: Issue;
-  role: string;
-}) {
+export default function IssueItem({ issue }: { issue: Issue }) {
+  const { data: session } = useSession();
   const router = useRouter();
-  if (issue.status == null) {
-    issue.status = "toDo";
-  }
+
   const [show, setShow] = useState(false);
 
   const clickHandler = async (status: string) => {
@@ -47,15 +41,18 @@ export default function IssueItem({
   return (
     <>
       {show && <UpsertModal onClose={() => setShow(false)} issue={issue} />}
-      <div className="m-1 flex items-center justify-between gap-4 rounded-lg border p-3">
-        <p className="flex-auto space-x-2 px-2">{issue.summary}</p>
-        {role === "productOwner" && (
+      <div className="flex items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white p-3 shadow dark:border-gray-700 dark:bg-gray-800">
+        <p className="flex-auto space-x-2 px-2 dark:text-white">
+          {issue.summary}
+        </p>
+        {session?.user.role === "productOwner" && (
           <MoveIssueButton updateIssue={updateIssue} issue={issue} />
         )}
         <select
           name="status"
           id="status"
-          defaultValue={issue.status}
+          className="rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          defaultValue={issue.status ?? "toDo"}
           onChange={(e) => clickHandler(e.target.value)}
         >
           <option value="toDo">To Do</option>
@@ -63,10 +60,10 @@ export default function IssueItem({
           <option value="done">Done</option>
         </select>
         <button
-          className="h-8 rounded bg-blue-500 px-4 font-semibold text-white hover:bg-blue-600"
+          className="block rounded-lg font-semibold"
           onClick={() => editHandler()}
         >
-          <FiEdit size="1.5em" />
+          <FiEdit size="1.5em" className="dark:stroke-white" />
         </button>
       </div>
     </>
