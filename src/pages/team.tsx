@@ -18,7 +18,7 @@ export default function Team({
 }) {
   const isAdmin = role === "admin";
   return (
-    <div className="flex flex-grow flex-col bg-white px-8 dark:bg-slate-700 ">
+    <div className="flex flex-grow flex-col bg-white dark:bg-slate-700 ">
       <div className="mb-4 mt-6 flex items-center justify-center gap-3">
         <div className="text-center">
           <h1 className="text-4xl font-semibold tracking-wide dark:text-white">
@@ -65,6 +65,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     },
     where: {
       teamId: session.user.teamId,
+    },
+    orderBy: {
+      name: "asc",
     },
   });
 

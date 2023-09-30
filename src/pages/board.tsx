@@ -12,7 +12,7 @@ export default function ScrumBoard({
   issues: Issue[];
   team: Team;
 }) {
-  const todoIssues = issues?.filter((issue) => issue.status === "toDo");
+  const toDoIssues = issues?.filter((issue) => issue.status === "toDo");
   const inProgressIssues = issues?.filter(
     (issue) => issue.status === "inProgress",
   );
@@ -26,8 +26,8 @@ export default function ScrumBoard({
           {team.projectName}, Sprint 0
         </h2>
       </div>
-      <div className="flex justify-center gap-4 px-4">
-        <IssueComp issues={todoIssues} status="TO DO" />
+      <div className="flex flex-col justify-center gap-4 px-4 md:flex-row">
+        <IssueComp issues={toDoIssues} status="TO DO" />
         <IssueComp issues={inProgressIssues} status="IN PROGRESS" />
         <IssueComp issues={doneIssues} status="DONE" />
       </div>
@@ -46,16 +46,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     };
   }
 
-  const issues = await prisma.issue.findMany({
-    select: {
-      summary: true,
-      status: true,
-    },
-    where: {
-      backlog: "sprint",
-    },
-  });
-
   if (!session.user?.teamId) {
     return {
       redirect: {
@@ -63,6 +53,17 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       },
     };
   }
+
+  const issues = await prisma.issue.findMany({
+    select: {
+      summary: true,
+      status: true,
+    },
+    where: {
+      teamId: session.user.teamId,
+      backlog: "sprint",
+    },
+  });
 
   const team = await prisma.team.findUnique({
     select: {

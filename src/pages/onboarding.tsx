@@ -11,7 +11,7 @@ export default function Onboarding() {
   const handleNewTeamSubmit = async (teamName: string, projectName: string) => {
     try {
       const body = { teamName, projectName, userId: session?.user.id };
-      await fetch(`/api/createTeam`, {
+      await fetch(`/api/teams/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -26,7 +26,7 @@ export default function Onboarding() {
   const handleJoinTeamSubmit = async (teamCode: string) => {
     try {
       const body = { teamCode, userId: session?.user.id };
-      await fetch(`/api/joinTeam`, {
+      await fetch(`/api/teams/join`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
