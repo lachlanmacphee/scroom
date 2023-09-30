@@ -23,15 +23,16 @@ export default function Navbar() {
           >
             <TbLogout2 size="2em" />
           </button>
-          {session?.user?.image && (
-            <Image
-              alt="avatar"
-              src={session.user.image}
-              width="32"
-              height="32"
-              className="rounded-full"
-            />
-          )}
+          <Image
+            alt="avatar"
+            src={
+              session?.user.image ??
+              `https://api.dicebear.com/7.x/bottts/png?seed=${session?.user.email}`
+            }
+            width="32"
+            height="32"
+            className="rounded-full"
+          />
         </div>
         {session?.user.teamId && (
           <div

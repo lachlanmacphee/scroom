@@ -12,7 +12,7 @@ export default function ResetTeamButton({ team }: { team: Team }) {
   const handleResetTeam = async () => {
     try {
       const body = { teamId: team.id };
-      await fetch(`/api/resetTeam`, {
+      await fetch(`/api/teams/reset`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

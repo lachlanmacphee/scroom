@@ -2,6 +2,7 @@ import React, { type FormEvent } from "react";
 import { useRouter } from "next/router";
 import { type Issue } from "@prisma/client";
 import Modal from "../common/Modal";
+import { useSession } from "next-auth/react";
 
 type onClose = () => void;
 
@@ -17,6 +18,7 @@ export default function UpsertIssueModal({
   backlog?: string;
 }) {
   const router = useRouter();
+  const { data: session } = useSession();
 
   const refreshData = async () => {
     await router.replace(router.asPath);
@@ -26,13 +28,13 @@ export default function UpsertIssueModal({
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     if (!issue && teamId) {
-      await fetch(`/api/createIssue`, {
+      await fetch(`/api/issues/create`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...Object.fromEntries(formData), teamId }),
       });
     } else if (issue?.id) {
-      await fetch(`/api/updateIssue`, {
+      await fetch(`/api/issues/update`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -60,31 +62,35 @@ export default function UpsertIssueModal({
               required
             />
           </div>
-          <div className="flex justify-between gap-2">
-            <label className="font-bold dark:text-white">Status</label>
-            <select
-              name="status"
-              id="status"
-              defaultValue={issue?.status ?? "toDo"}
-              className="w-3/4 rounded-md border border-gray-900"
-            >
-              <option value="toDo">To Do</option>
-              <option value="inProgress">In Progress</option>
-              <option value="done">Done</option>
-            </select>
-          </div>
-          <div className="flex justify-between gap-2">
-            <label className="font-bold dark:text-white">Backlog</label>
-            <select
-              name="backlog"
-              id="backlog"
-              className="w-3/4 rounded-md border border-gray-900"
-              defaultValue={issue?.backlog ?? backlog}
-            >
-              <option value="sprint">Sprint Backlog</option>
-              <option value="product">Product Backlog</option>
-            </select>
-          </div>
+          {backlog === "sprint" && (
+            <div className="flex justify-between gap-2">
+              <label className="font-bold dark:text-white">Status</label>
+              <select
+                name="status"
+                id="status"
+                defaultValue={issue?.status ?? "toDo"}
+                className="w-3/4 rounded-md border border-gray-900"
+              >
+                <option value="toDo">To Do</option>
+                <option value="inProgress">In Progress</option>
+                <option value="done">Done</option>
+              </select>
+            </div>
+          )}
+          {session?.user.role === "productOwner" && (
+            <div className="flex justify-between gap-2">
+              <label className="font-bold dark:text-white">Backlog</label>
+              <select
+                name="backlog"
+                id="backlog"
+                className="w-3/4 rounded-md border border-gray-900"
+                defaultValue={issue?.backlog ?? backlog}
+              >
+                <option value="sprint">Sprint Backlog</option>
+                <option value="product">Product Backlog</option>
+              </select>
+            </div>
+          )}
         </div>
         <div className="flex items-center justify-end space-x-2">
           <button

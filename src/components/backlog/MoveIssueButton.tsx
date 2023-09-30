@@ -22,7 +22,7 @@ export default function MoveIssueButton({
         className="h-8 rounded bg-blue-500 px-4 font-semibold text-white hover:bg-blue-600"
         data-testid="moveIssueButton"
         onClick={() =>
-          updateIssue(issue.id, issue.summary, issue.status ?? "todo", "sprint")
+          updateIssue(issue.id, issue.summary, issue.status ?? "toDo", "sprint")
         }
       >
         <AiOutlineArrowUp size="1.5em" />
@@ -34,7 +34,7 @@ export default function MoveIssueButton({
       className="h-8 rounded bg-blue-500 px-4 font-semibold text-white hover:bg-blue-600"
       data-testid="moveIssueButton"
       onClick={() =>
-        updateIssue(issue.id, issue.summary, issue.status ?? "todo", "product")
+        updateIssue(issue.id, issue.summary, issue.status ?? "toDo", "product")
       }
     >
       <AiOutlineArrowDown size="1.5em" />
