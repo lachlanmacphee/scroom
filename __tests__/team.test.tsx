@@ -5,6 +5,7 @@ import ResetTeamButton from "~/components/team/ResetTeamButton";
 import LeaveTeamButton from "~/components/team/LeaveTeamButton";
 import RemoveMemberButton from "~/components/team/RemoveMemberButton";
 import MemberStoryPoints from "~/components/team/MemberStoryPoints";
+import InviteMemberButton from "~/components/team/InviteMemberButton";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock("next/router", () => jest.requireActual("next-router-mock"));
@@ -71,10 +72,24 @@ describe("RemoveMemberButton", () => {
     expect(removeButton).toBeInTheDocument();
   });
 });
+
 describe("MemberStoryPoints", () => {
   it("renders points display", () => {
     render(<MemberStoryPoints points={points} />);
     const pointsText = screen.getByText("5/10");
     expect(pointsText).toBeInTheDocument();
+  });
+});
+
+describe("InviteMemberModal", () => {
+  it("renders email field", () => {
+    render(<InviteMemberButton team={team} />);
+    const emailInput = screen.getByTestId("toEmailField");
+    expect(emailInput).toBeInTheDocument();
+  });
+  it("renders new Member button", () => {
+    render(<InviteMemberButton team={team} />);
+    const newMemberButton = screen.getByTestId("inviteTeamMemberButton");
+    expect(newMemberButton).toBeInTheDocument();
   });
 });

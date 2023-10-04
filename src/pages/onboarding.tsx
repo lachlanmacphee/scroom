@@ -2,11 +2,18 @@ import { type GetServerSidePropsContext } from "next";
 import { getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
-import JoinTeam from "~/components/onboarding/JoinTeam";
-import NewTeam from "~/components/onboarding/NewTeam";
+import JoinTeam from "~/components/onboarding/joinTeam";
+import NewTeam from "~/components/onboarding/newTeam";
+
 export default function Onboarding() {
   const router = useRouter();
+
+  let { teamId } = router.query;
   const { data: session, update } = useSession();
+
+  if (Array.isArray(teamId)) {
+    teamId = teamId[0];
+  }
 
   const handleNewTeamSubmit = async (teamName: string, projectName: string) => {
     try {
@@ -49,7 +56,10 @@ export default function Onboarding() {
             Would you like to join an existing team or create a new team?
           </p>
           <div className="flex gap-16">
-            <JoinTeam handleJoinTeamSubmit={handleJoinTeamSubmit} />
+            <JoinTeam
+              handleJoinTeamSubmit={handleJoinTeamSubmit}
+              teamId={teamId}
+            />
             <NewTeam handleNewTeamSubmit={handleNewTeamSubmit} />
           </div>
         </div>
