@@ -27,3 +27,11 @@ test("reset button enables once input field correct", async ({ page }) => {
   await page.getByTestId("resetConfirmField").fill("reset");
   await expect(page.getByTestId("resetTeamButton")).toBeEnabled();
 });
+
+test("leave team button enables once input field correct", async ({ page }) => {
+  await page.goto("/team");
+  await page.getByTestId("leaveTeamButton").click();
+  await expect(page.getByTestId("leaveTeamButton")).toBeDisabled();
+  await page.getByTestId("leaveConfirmField").fill("leave");
+  await expect(page.getByTestId("leaveTeamButton")).toBeEnabled();
+});
