@@ -120,7 +120,7 @@ export default function UpsertIssueModal({
             >
               <option value="task">Task</option>
               <option value="story">Story</option>
-              <option value="Bug">Bug</option>
+              <option value="bug">Bug</option>
             </select>
           </div>
           <div className="flex justify-between gap-2">
