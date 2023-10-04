@@ -45,3 +45,8 @@ test("admin remove member button enables once input field correct", async ({
   await page.getByTestId("removeConfirmField").fill("remove");
   await expect(page.getByTestId("removeMemberButton")).toBeEnabled();
 });
+
+test("can see user completed and total points", async ({ page }) => {
+  await page.goto("/team");
+  await expect(page.getByTestId("memberStoryPoints")).toBeVisible();
+});

@@ -4,6 +4,7 @@ import TeamDetailsModal from "~/components/team/TeamDetailsButton";
 import ResetTeamButton from "~/components/team/ResetTeamButton";
 import LeaveTeamButton from "~/components/team/LeaveTeamButton";
 import RemoveMemberButton from "~/components/team/RemoveMemberButton";
+import MemberStoryPoints from "~/components/team/MemberStoryPoints";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock("next/router", () => jest.requireActual("next-router-mock"));
@@ -17,6 +18,7 @@ const user = {
   emailVerified: null,
   image: null,
 };
+const points = { donePoints: "5", totalPoints: "10" };
 
 describe("TeamDetailsModal", () => {
   it("renders team name field", () => {
@@ -67,5 +69,12 @@ describe("RemoveMemberButton", () => {
     render(<RemoveMemberButton user={user} />);
     const removeButton = screen.getByTestId("removeButton");
     expect(removeButton).toBeInTheDocument();
+  });
+});
+describe("MemberStoryPoints", () => {
+  it("renders points display", () => {
+    render(<MemberStoryPoints points={points} />);
+    const pointsText = screen.getByText("5/10");
+    expect(pointsText).toBeInTheDocument();
   });
 });
