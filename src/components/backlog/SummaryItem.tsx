@@ -25,7 +25,7 @@ function SummaryItem({
 
   return (
     <p
-      className="flex-auto space-x-2 px-2 text-white"
+      className="flex-auto space-x-2 px-2 dark:text-white"
       onClick={() => handleOnClick(issue)}
     >
       {!editMode && issue.summary}

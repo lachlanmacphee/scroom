@@ -1,10 +1,10 @@
 import UserRow from "~/components/team/UserRow";
 import React, { useState } from "react";
 import type { User } from "@prisma/client";
-import type { PointsDict } from "~/types";
+import type { PointsDict } from "~/utils/types";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import sortUsers from "./sortUsers";
+import { sortUsers } from "~/utils/funcs";
 
 export default function UserTable({
   users,

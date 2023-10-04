@@ -24,7 +24,7 @@ export default function LeaveTeamButton() {
         body: JSON.stringify(body),
       });
       await router.replace(router.asPath);
-      handleClose()
+      handleClose();
     } catch (error) {
       console.error("Error leaving team:", error);
     }
@@ -36,7 +36,7 @@ export default function LeaveTeamButton() {
         data-testid="leaveTeamButton"
         onClick={() => setIsLeaveModalOpen(true)}
       >
-        <BsFillPersonDashFill size="1.75em" className="dark:stroke-white" />
+        <BsFillPersonDashFill size="1.75em" className="dark:fill-white" />
       </button>
       {isLeaveModalOpen && (
         <Modal title="Confirm Leaving Team" onClose={handleClose}>

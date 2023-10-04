@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import type { Issue, User } from "@prisma/client";
 import { useRouter } from "next/router";
-import { FiEdit } from "react-icons/fi";
 import UpsertIssueModal from "./UpsertIssueModal";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -9,18 +8,17 @@ import clsx from "clsx";
 import SummaryItem from "./SummaryItem";
 import StatusDropDown from "./StatusDropDown";
 import EditIssueButton from "./EditIssueButton";
+import { useSession } from "next-auth/react";
 
 export function IssueItem({
   issue,
-  role,
   teamUsers,
 }: {
   issue: Issue;
-  role: string;
   teamUsers: User[];
 }) {
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
-
+  const { data: session } = useSession();
   const {
     attributes,
     listeners,
@@ -70,7 +68,7 @@ export function IssueItem({
     }
   };
 
-  if (role === "productOwner") {
+  if (session?.user.role === "productOwner") {
     return (
       <div
         {...listeners}
@@ -78,13 +76,15 @@ export function IssueItem({
         {...attributes}
         style={style}
         className={clsx(
-          "text-md flex h-[60px] cursor-grab items-center justify-between rounded-md border-2 p-3 font-bold",
+          "text-md flex h-[60px] cursor-grab flex-col items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white p-3 shadow dark:border-gray-700 dark:bg-gray-700 md:flex-row md:gap-0",
           isDragging && "opacity-50",
         )}
       >
         <SummaryItem issue={issue} updateIssue={updateIssue} />
-        <StatusDropDown issue={issue} clickHandler={updateIssueHandler} />
-        <EditIssueButton editHandler={editIssueHandler} />
+        <div className="flex gap-2">
+          <StatusDropDown issue={issue} clickHandler={updateIssueHandler} />
+          <EditIssueButton editHandler={editIssueHandler} />
+        </div>
         {isIssueModalOpen && (
           <UpsertIssueModal
             onClose={() => setIsIssueModalOpen(false)}
@@ -102,13 +102,15 @@ export function IssueItem({
       style={style}
       {...attributes}
       className={clsx(
-        "text-md flex h-[60px] cursor-grab items-center justify-between rounded-md rounded-b-none border-2 p-3 font-bold",
+        "text-md flex h-[60px] cursor-grab items-center justify-between rounded-md p-2 font-bold dark:bg-slate-700",
         isDragging && "opacity-50",
       )}
     >
       <SummaryItem issue={issue} updateIssue={updateIssue} />
-      <StatusDropDown issue={issue} clickHandler={updateIssueHandler} />
-      <EditIssueButton editHandler={editIssueHandler} />
+      <div className="flex gap-4">
+        <StatusDropDown issue={issue} clickHandler={updateIssueHandler} />
+        <EditIssueButton editHandler={editIssueHandler} />
+      </div>
       {isIssueModalOpen && (
         <UpsertIssueModal
           onClose={() => setIsIssueModalOpen(false)}

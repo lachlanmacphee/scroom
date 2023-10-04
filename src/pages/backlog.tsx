@@ -1,12 +1,12 @@
 import { type GetServerSidePropsContext } from "next";
-import { getSession, useSession } from "next-auth/react";
-import React, { useState } from "react";
+import { getSession } from "next-auth/react";
+import React, { useEffect, useState } from "react";
 import type { Issue, Team, User } from "@prisma/client";
 import { prisma } from "~/server/db";
 import { arrayMove } from "@dnd-kit/sortable";
 import BacklogContainer from "~/components/backlog/BacklogContainer";
 import { IssueItem } from "~/components/backlog/IssueItem";
-import { containers } from "~/components/backlog/constants";
+import { containers } from "~/utils/constants";
 import {
   DndContext,
   type DragEndEvent,
@@ -18,11 +18,9 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import UpsertIssueModal from "~/components/backlog/UpsertIssueModal";
 
 export default function Backlog({
   dataIssues,
-  teamId,
   team,
   teamUsers,
 }: {
@@ -33,9 +31,11 @@ export default function Backlog({
 }) {
   const [activeIssue, setActiveIssue] = useState<Issue | null>(null);
   const [activeContainer, setActiveContainer] = useState<string | null>(null);
-  const [showAddIssueModal, setShowAddIssueModal] = useState(false);
   const [issues, setIssues] = useState<Issue[]>(dataIssues);
-  const { data: session } = useSession();
+
+  useEffect(() => {
+    setIssues(dataIssues);
+  }, [dataIssues]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -66,57 +66,37 @@ export default function Backlog({
   };
 
   return (
-    <>
-      <div className="flex flex-grow flex-col bg-white dark:bg-slate-700">
-        <div className="relative flex py-4 text-center">
-          <h1 className="flex-auto text-3xl font-bold dark:text-white">
-            {team.projectName}
-          </h1>
-          <button
-            className="rounded-full bg-gray-800 px-4 py-2 text-white shadow-lg  hover:bg-blue-600"
-            onClick={() => setShowAddIssueModal(true)}
-          >
-            +
-          </button>
-        </div>
-        {showAddIssueModal && (
-          <UpsertIssueModal
-            onClose={() => setShowAddIssueModal(false)}
-            teamId={teamId}
-            teamUsers={teamUsers}
-          />
-        )}
-
-        <div className="bg-white dark:bg-slate-700">
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCorners}
-            onDragStart={onDragStart}
-            onDragOver={onDragOver}
-            onDragEnd={onDragEnd}
-          >
-            <div className="grid grid-cols-1 gap-4">
-              {containers.map((container) => (
-                <BacklogContainer
-                  title={container.title}
-                  role={session?.user.role ?? "guest"}
-                  key={container.title}
-                  id={container.id}
-                  issues={issues.filter(
-                    (issue) => issue.backlog === container.id,
-                  )}
-                />
-              ))}
-            </div>
-            <DragOverlay adjustScale={false}>
-              {activeIssue && (
-                <IssueItem issue={activeIssue} teamUsers={teamUsers} />
-              )}
-            </DragOverlay>
-          </DndContext>
-        </div>
+    <div className="flex flex-grow flex-col bg-white px-12 dark:bg-slate-700">
+      <div className="flex pb-4 pt-8">
+        <h1 className="flex-auto text-center text-3xl font-bold dark:text-white">
+          {team.projectName}
+        </h1>
       </div>
-    </>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragStart={onDragStart}
+        onDragOver={onDragOver}
+        onDragEnd={onDragEnd}
+      >
+        <div className="grid grid-cols-1 gap-4">
+          {containers.map((container) => (
+            <BacklogContainer
+              title={container.title}
+              key={container.title}
+              id={container.id}
+              issues={issues.filter((issue) => issue.backlog === container.id)}
+              teamUsers={teamUsers}
+            />
+          ))}
+        </div>
+        <DragOverlay adjustScale={false}>
+          {activeIssue && (
+            <IssueItem issue={activeIssue} teamUsers={teamUsers} />
+          )}
+        </DragOverlay>
+      </DndContext>
+    </div>
   );
   function onDragStart(event: DragStartEvent) {
     if (event.active.data.current?.type === "issue") {

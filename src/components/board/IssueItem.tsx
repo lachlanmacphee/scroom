@@ -2,6 +2,7 @@ import React from "react";
 import type { Issue } from "@prisma/client";
 import { CSS } from "@dnd-kit/utilities";
 import { useDraggable } from "@dnd-kit/core";
+import IssueStoryPoints from "./IssueStoryPoints";
 
 interface IssueProps {
   issue: Issue;
@@ -21,9 +22,10 @@ export default function IssueItem({ issue }: IssueProps) {
       style={style}
       {...attributes}
       {...listeners}
-      className="mb-2 rounded border border-blue-800 p-2"
+      className="flex items-center justify-between gap-4 rounded-lg bg-white p-3 shadow dark:bg-gray-700"
     >
-      {issue.summary}
+      <p>{issue.summary}</p>
+      <IssueStoryPoints issue={issue} />
     </div>
   );
 }

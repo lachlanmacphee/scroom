@@ -23,10 +23,6 @@ export default function UpsertIssueModal({
   const { data: session } = useSession();
   const router = useRouter();
 
-  const refreshData = async () => {
-    await router.replace(router.asPath);
-  };
-
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -47,7 +43,7 @@ export default function UpsertIssueModal({
       });
     }
     onClose();
-    await refreshData();
+    await router.replace(router.asPath);
   };
 
   return (
@@ -57,7 +53,7 @@ export default function UpsertIssueModal({
           <div className="flex justify-between gap-2">
             <label className="font-bold dark:text-white">Summary</label>
             <input
-              className="w-3/4 rounded-md border border-gray-900"
+              className="w-3/4 rounded-md border border-gray-900 pl-1"
               type="text"
               name="summary"
               data-testid="summary"
@@ -128,16 +124,14 @@ export default function UpsertIssueModal({
             </select>
           </div>
           <div className="flex justify-between gap-2">
-            <label className="font-bold dark:text-white">
-              Story Point Estimate
-            </label>
+            <label className="font-bold dark:text-white">Estimate</label>
             <input
               name="estimate"
               type="number"
               data-testid="estimate"
               min="0"
-              className="w-3/4 rounded-md border border-gray-900"
-              defaultValue={issue?.estimate ?? 0}
+              className="w-3/4 rounded-md border border-gray-900 pl-1"
+              defaultValue={issue?.estimate ?? "0"}
             />
           </div>
         </div>
