@@ -35,3 +35,13 @@ test("leave team button enables once input field correct", async ({ page }) => {
   await page.getByTestId("leaveConfirmField").fill("leave");
   await expect(page.getByTestId("leaveTeamButton")).toBeEnabled();
 });
+
+test("admin remove member button enables once input field correct", async ({
+  page,
+}) => {
+  await page.goto("/team");
+  await page.getByTestId("removeMemberButton").click();
+  await expect(page.getByTestId("removeMemberButton")).toBeDisabled();
+  await page.getByTestId("removeConfirmField").fill("remove");
+  await expect(page.getByTestId("removeMemberButton")).toBeEnabled();
+});

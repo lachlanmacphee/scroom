@@ -1,6 +1,7 @@
 import React from "react";
 import type { User } from "@prisma/client";
 import Image from "next/image";
+import RemoveMemberButton from "~/components/team/RemoveMemberButton";
 
 type handleRoleChange = (id: string, newRole: string) => Promise<void>;
 
@@ -36,19 +37,22 @@ export default function UserRow({ user, handleRoleChange, role }: userProps) {
         </div>
       </div>
       {role === "admin" && (
-        <select
-          defaultValue={user.role ?? "guest"}
-          className="rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-          onChange={(e) => clickHandler(e.target.value)}
-          data-testid="roleSelectDropdown"
-        >
-          <option value="admin">Admin</option>
-          <option value="scrumMaster">Scrum Master</option>
-          <option value="productOwner">Product Owner</option>
-          <option value="proxyProductOwner">Proxy Product Owner</option>
-          <option value="developer">Developer</option>
-          <option value="guest">Guest</option>
-        </select>
+        <div className="flex space-x-4">
+          <select
+            defaultValue={user.role ?? "guest"}
+            className="rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            onChange={(e) => clickHandler(e.target.value)}
+            data-testid="roleSelectDropdown"
+          >
+            <option value="admin">Admin</option>
+            <option value="scrumMaster">Scrum Master</option>
+            <option value="productOwner">Product Owner</option>
+            <option value="proxyProductOwner">Proxy Product Owner</option>
+            <option value="developer">Developer</option>
+            <option value="guest">Guest</option>
+          </select>
+          <RemoveMemberButton user={user} />
+        </div>
       )}
     </div>
   );

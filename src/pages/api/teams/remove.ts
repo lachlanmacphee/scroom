@@ -12,9 +12,9 @@ export default async function handleRemoveMember(
   res: NextApiResponse,
 ) {
   const { userId } = req.body;
-  
+
   try {
-    const result = await prisma.user.update({
+    const users = await prisma.user.update({
       where: {
         id: userId,
       },
@@ -23,7 +23,8 @@ export default async function handleRemoveMember(
         role: null,
       },
     });
-    await prisma.issue.updateMany({
+
+    const issues = await prisma.issue.updateMany({
       where: {
         userId: userId,
       },
@@ -31,7 +32,7 @@ export default async function handleRemoveMember(
         userId: null,
       },
     });
-    res.status(200).json(result);
+    res.status(200).json({ users, issues });
   } catch (err) {
     res.status(500).json({ error: "Failed to remove user from team" });
   }
