@@ -1,22 +1,92 @@
-import React from "react";
+import React, { useState } from "react";
 import { type GetServerSidePropsContext } from "next";
 import { getSession } from "next-auth/react";
 import type { Issue, Team } from "@prisma/client";
 import { prisma } from "~/server/db";
-import IssueComp from "~/components/board/IssueComp";
+import IssueContainer from "~/components/board/IssueContainer";
+import { DndContext, type DragEndEvent , type DragOverEvent } from "@dnd-kit/core";
+import { columns } from "~/components/board/constants";
+import { arrayMove } from "@dnd-kit/sortable";
+
 
 export default function ScrumBoard({
-  issues,
+  backendIssues,
   team,
 }: {
-  issues: Issue[];
+  backendIssues: Issue[];
   team: Team;
 }) {
-  const toDoIssues = issues?.filter((issue) => issue.status === "toDo");
-  const inProgressIssues = issues?.filter(
-    (issue) => issue.status === "inProgress",
-  );
-  const doneIssues = issues?.filter((issue) => issue.status === "done");
+  const [issues, setIssues] = useState(backendIssues);
+
+  const updateIssue = async (issueID: string, status: string) => {
+    try {
+      const body = { issueID, status };
+      await fetch(`/api/issues/update`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  async function onDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    if (!over) {
+      return;
+    }
+
+    const issuesDupe = [...issues];
+    const activeIssue = issuesDupe.find(
+      (issue) => issue.id === active.id.toString(),
+    );
+    if (activeIssue) {
+      activeIssue.status = over.id.toString();
+      setIssues(issuesDupe);
+      await updateIssue(active.id.toString(), over.id.toString());
+    }
+  }
+
+  function onDragOver(event: DragOverEvent) {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+
+
+    if (activeId === overId) return;
+
+    const isActiveAIssue = active.data.current?.type === "Issues";
+    const isOverAIssue = over.data.current?.type === "Issues";
+
+    if (!isActiveAIssue) return;
+
+
+     if (isActiveAIssue && isOverAIssue) {
+      setIssues((issues) => {
+        const activeIndex = issues.findIndex((t) => t.id === activeId);
+        const overIndex = issues.findIndex((t) => t.id === overId);
+
+        issues[activeIndex]!.backlog = issues[overIndex]!.backlog;
+
+        return arrayMove(issues, activeIndex, overIndex);
+      });
+
+    const isOverAContainer = over.data.current?.type === "Container";
+
+
+    if (isActiveAIssue && isOverAContainer) {
+      setIssues((issues) => {
+        const activeIndex = issues.findIndex((t) => t.id === activeId);
+        issues[activeIndex]!.status = over.id as string;
+        return arrayMove(issues, activeIndex, activeIndex);
+      });
+    }
+  }
+}
 
   return (
     <div className="flex flex-grow flex-col bg-white dark:bg-slate-700">
@@ -26,11 +96,18 @@ export default function ScrumBoard({
           {team.projectName}, Sprint 0
         </h2>
       </div>
-      <div className="flex flex-col justify-center gap-4 px-4 md:flex-row">
-        <IssueComp issues={toDoIssues} status="TO DO" />
-        <IssueComp issues={inProgressIssues} status="IN PROGRESS" />
-        <IssueComp issues={doneIssues} status="DONE" />
-      </div>
+      <DndContext onDragEnd={onDragEnd} onDragOver = {onDragOver}>
+        <div className="flex flex-col justify-center gap-4 px-4 md:flex-row">
+          {columns.map((col) => (
+            <IssueContainer
+              key={col.id}
+              containerId={col.id}
+              containerTitle={col.title}
+              issues={issues.filter((issue) => issue.status === col.id)}
+            />
+          ))}
+        </div>
+      </DndContext>
     </div>
   );
 }
@@ -47,25 +124,22 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   }
 
   if (!session.user?.teamId) {
-    return {
-      redirect: {
-        destination: "/onboarding",
-      },
-    };
+    return;
   }
 
   const issues = await prisma.issue.findMany({
     select: {
+      id: true,
       summary: true,
       status: true,
       estimate: true,
+      backlog: true,
     },
     where: {
-      teamId: session.user.teamId,
       backlog: "sprint",
     },
     orderBy: {
-      estimate: { sort: "desc", nulls: 'last' },
+      estimate: { sort: "desc", nulls: "last" },
     },
   });
 
@@ -79,6 +153,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   });
 
   return {
-    props: { issues, team },
+    props: { backendIssues: issues, team },
   };
 }

@@ -19,9 +19,8 @@ export default async function handleUpdateIssue(
   res: NextApiResponse,
 ) {
   const session = await getServerSession(req, res, authOptions);
-  const { issueID, status, summary, backlog, estimate, type } =
-    req.body;
-  let userId = req.body.userId
+  const { issueID, status, summary, backlog, estimate, type } = req.body;
+  let userId = req.body.userId;
 
   if (backlog && session?.user.role !== "productOwner") {
     return res
@@ -29,7 +28,7 @@ export default async function handleUpdateIssue(
       .json({ error: "Only the product owner can perform this operation" });
   }
   if (userId === "") {
-    userId = null
+    userId = null;
   }
   const issue = await prisma.issue.update({
     where: {
