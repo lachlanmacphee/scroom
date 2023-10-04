@@ -9,6 +9,7 @@ import SummaryItem from "./SummaryItem";
 import StatusDropDown from "./StatusDropDown";
 import EditIssueButton from "./EditIssueButton";
 import { useSession } from "next-auth/react";
+import DeleteIssueButton from "./DeleteIssueButton";
 
 export function IssueItem({
   issue,
@@ -84,6 +85,7 @@ export function IssueItem({
         <div className="flex gap-2">
           <StatusDropDown issue={issue} clickHandler={updateIssueHandler} />
           <EditIssueButton editHandler={editIssueHandler} />
+          <DeleteIssueButton issue={issue} />
         </div>
         {isIssueModalOpen && (
           <UpsertIssueModal
