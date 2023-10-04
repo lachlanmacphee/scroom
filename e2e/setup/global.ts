@@ -112,8 +112,7 @@ export default async function globalSetup() {
     update: {
       role: "admin",
     },
-  }); 
-
+  });
 
   const storageState = path.resolve(__dirname, "storageState.json");
   const browser = await chromium.launch();
