@@ -58,10 +58,14 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     select: {
       summary: true,
       status: true,
+      estimate: true,
     },
     where: {
       teamId: session.user.teamId,
       backlog: "sprint",
+    },
+    orderBy: {
+      estimate: { sort: "desc", nulls: 'last' },
     },
   });
 
