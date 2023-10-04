@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import React, { type FormEvent } from "react";
 import { useRouter } from "next/router";
-import { type Issue } from "@prisma/client";
-import Modal from "../common/Modal";
 import { useSession } from "next-auth/react";
+import { type Issue, type User } from "@prisma/client";
+import Modal from "../common/Modal";
 
 type onClose = () => void;
 
@@ -11,14 +12,16 @@ export default function UpsertIssueModal({
   issue,
   teamId,
   backlog,
+  teamUsers,
 }: {
   onClose: onClose;
   issue?: Issue;
   teamId?: string;
   backlog?: string;
+  teamUsers: User[];
 }) {
-  const router = useRouter();
   const { data: session } = useSession();
+  const router = useRouter();
 
   const refreshData = async () => {
     await router.replace(router.asPath);
@@ -68,6 +71,7 @@ export default function UpsertIssueModal({
               <select
                 name="status"
                 id="status"
+                data-testid="status"
                 defaultValue={issue?.status ?? "toDo"}
                 className="w-3/4 rounded-md border border-gray-900"
               >
@@ -83,6 +87,7 @@ export default function UpsertIssueModal({
               <select
                 name="backlog"
                 id="backlog"
+                data-testid="backlog"
                 className="w-3/4 rounded-md border border-gray-900"
                 defaultValue={issue?.backlog ?? backlog}
               >
@@ -91,6 +96,50 @@ export default function UpsertIssueModal({
               </select>
             </div>
           )}
+          <div className="flex justify-between gap-2">
+            <label className="font-bold dark:text-white">Assignee</label>
+            <select
+              name="userId"
+              id="assignee"
+              data-testid="assignee"
+              defaultValue={issue?.userId ?? ""}
+              className="w-3/4 rounded-md border border-gray-900"
+            >
+              <option value="">Unassigned</option>
+              {teamUsers.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex justify-between gap-2">
+            <label className="font-bold dark:text-white">Type</label>
+            <select
+              name="type"
+              id="type"
+              data-testid="type"
+              defaultValue={issue?.type ?? "task"}
+              className="w-3/4 rounded-md border border-gray-900"
+            >
+              <option value="task">Task</option>
+              <option value="story">Story</option>
+              <option value="Bug">Bug</option>
+            </select>
+          </div>
+          <div className="flex justify-between gap-2">
+            <label className="font-bold dark:text-white">
+              Story Point Estimate
+            </label>
+            <input
+              name="estimate"
+              type="number"
+              data-testid="estimate"
+              min="0"
+              className="w-3/4 rounded-md border border-gray-900"
+              defaultValue={issue?.estimate ?? 0}
+            />
+          </div>
         </div>
         <div className="flex items-center justify-end space-x-2">
           <button

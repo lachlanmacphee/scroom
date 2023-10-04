@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import UpsertIssueModal from "./UpsertIssueModal";
 import { useSession } from "next-auth/react";
 import { AiOutlinePlus } from "react-icons/ai";
+import type { User } from "@prisma/client";
 
-export default function AddIssueButton({ backlog }: { backlog: string }) {
+export default function AddIssueButton({ backlog, teamUsers }: { backlog: string, teamUsers:User[] }) {
   const [showAddIssueModal, setShowAddIssueModal] = useState(false);
   const { data: session } = useSession();
   return (
@@ -13,6 +14,7 @@ export default function AddIssueButton({ backlog }: { backlog: string }) {
           onClose={() => setShowAddIssueModal(false)}
           backlog={backlog}
           teamId={session?.user.teamId}
+          teamUsers={teamUsers}
         />
       )}
 
