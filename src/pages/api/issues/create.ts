@@ -5,10 +5,13 @@ import { authOptions } from "~/server/auth";
 
 interface ExtendNextApiRequest extends NextApiRequest {
   body: {
-    issueID: string;
     summary: string;
     status: string;
     backlog: string;
+    estimate: string;
+    type: string;
+    userId: string;
+    teamId: string;
   };
 }
 
@@ -17,21 +20,23 @@ export default async function handleUpdateIssue(
   res: NextApiResponse,
 ) {
   const session = await getServerSession(req, res, authOptions);
-  const { issueID, status, summary, backlog } = req.body;
+  const { status, summary, backlog, estimate, type, userId, teamId } = req.body;
 
   if (backlog && session?.user.role !== "productOwner") {
     res.status(401);
   } else {
-    const issue = await prisma.issue.update({
-      where: {
-        id: issueID,
-      },
+    const issue = await prisma.issue.create({
       data: {
         status: status,
         summary: summary,
         backlog: backlog,
+        estimate: Number(estimate),
+        type: type,
+        teamId: teamId,
+        userId: userId === "" ? null : userId,
       },
     });
+
     res.json(issue);
   }
 

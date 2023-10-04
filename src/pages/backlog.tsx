@@ -1,22 +1,31 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { type GetServerSidePropsContext } from "next";
 import { getSession } from "next-auth/react";
 import React from "react";
-import type { Issue } from "@prisma/client";
 import { prisma } from "~/server/db";
 import BacklogSection from "~/components/backlog/BacklogSection";
+import type { Issue, User } from "@prisma/client";
 
 export default function Backlog({
   sprintIssues,
   productIssues,
+  teamUsers,
 }: {
   sprintIssues: Issue[];
   productIssues: Issue[];
+  teamUsers: User[];
 }) {
   return (
     <div className="flex flex-grow flex-col bg-white dark:bg-slate-700">
-      <BacklogSection issues={sprintIssues} backlog="sprint" />
-      <BacklogSection issues={productIssues} backlog="product" />
+      <BacklogSection
+        issues={sprintIssues}
+        backlog="sprint"
+        teamUsers={teamUsers}
+      />
+      <BacklogSection
+        issues={productIssues}
+        backlog="product"
+        teamUsers={teamUsers}
+      />
     </div>
   );
 }
@@ -47,6 +56,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       backlog: true,
       summary: true,
       teamId: true,
+      estimate: true,
+      type: true,
+      userId: true,
     },
     where: {
       teamId: session.user.teamId,
@@ -64,6 +76,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       backlog: true,
       summary: true,
       teamId: true,
+      estimate: true,
+      type: true,
+      userId: true,
     },
     where: {
       teamId: session.user.teamId,
@@ -74,10 +89,23 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     },
   });
 
+  const teamUsers = await prisma.user.findMany({
+    select: {
+      id: true,
+      name: true,
+      teamId: true,
+      role: true,
+    },
+    where: {
+      teamId: session.user?.teamId,
+    },
+  });
+
   return {
     props: {
       sprintIssues,
       productIssues,
+      teamUsers,
     },
   };
 }

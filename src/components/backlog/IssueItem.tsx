@@ -1,17 +1,19 @@
 import React, { useState } from "react";
-import type { Issue } from "@prisma/client";
+import type { Issue, User } from "@prisma/client";
 import { useRouter } from "next/router";
 import { FiEdit } from "react-icons/fi";
 import MoveIssueButton from "./MoveIssueButton";
-import UpsertModal from "./UpsertIssueModal";
+import UpsertIssueModal from "./UpsertIssueModal";
 import { useSession } from "next-auth/react";
 
 export default function IssueItem({
   issue,
   backlog,
+  teamUsers,
 }: {
   issue: Issue;
   backlog: string;
+  teamUsers: User[];
 }) {
   const { data: session } = useSession();
   const router = useRouter();
@@ -40,9 +42,16 @@ export default function IssueItem({
       console.error(error);
     }
   };
+
   return (
     <>
-      {show && <UpsertModal onClose={() => setShow(false)} issue={issue} />}
+      {show && (
+        <UpsertIssueModal
+          onClose={() => setShow(false)}
+          issue={issue}
+          teamUsers={teamUsers}
+        />
+      )}
       <div className="flex items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white p-3 shadow dark:border-gray-700 dark:bg-gray-800">
         <p className="flex-auto space-x-2 px-2 dark:text-white">
           {issue.summary}

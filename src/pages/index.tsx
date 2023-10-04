@@ -65,6 +65,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const recentIssues = await prisma.issue.findMany({
     where: {
       teamId: session.user.teamId,
+      userId: session.user.id,
     },
     select: {
       id: true,
