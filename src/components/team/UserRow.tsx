@@ -1,6 +1,6 @@
 import React from "react";
 import type { User } from "@prisma/client";
-import type { Points } from "~/types";
+import type { Points } from "~/utils/types";
 import Image from "next/image";
 import RemoveMemberButton from "~/components/team/RemoveMemberButton";
 import MemberStoryPoints from "~/components/team/MemberStoryPoints";
@@ -44,8 +44,7 @@ export default function UserRow({
           <p className="text-xs font-light dark:text-gray-400">{user.email}</p>
         </div>
       </div>
-      <div>
-        {userPoints && <MemberStoryPoints points={userPoints} />}
+      <div className="flex gap-4">
         {role === "admin" && (
           <div className="flex space-x-4">
             <select
@@ -61,8 +60,11 @@ export default function UserRow({
               <option value="developer">Developer</option>
               <option value="guest">Guest</option>
             </select>
-            <RemoveMemberButton user={user} />
           </div>
+        )}
+        {userPoints && <MemberStoryPoints points={userPoints} />}
+        {user.role !== "admin" && role === "admin" && (
+          <RemoveMemberButton user={user} />
         )}
       </div>
     </div>

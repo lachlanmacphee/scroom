@@ -1,16 +1,20 @@
 import React from "react";
-import type { Issue } from "@prisma/client";
+import type { Issue, User } from "@prisma/client";
 import { IssueItem } from "./IssueItem";
 import { useDroppable } from "@dnd-kit/core";
+import { useSession } from "next-auth/react";
+import AddIssueButton from "./AddIssueButton";
 
 interface ContainerProps {
   title?: string;
   id: string;
   issues: Issue[];
-  role: string;
+  teamUsers: User[];
 }
 
-function BacklogContainer({ title, id, issues, role }: ContainerProps) {
+function BacklogContainer({ title, id, issues, teamUsers }: ContainerProps) {
+  const { data: session } = useSession();
+  const isProductOwner = session?.user.role === "productOwner";
   const { setNodeRef } = useDroppable({
     id: id,
     data: {
@@ -19,25 +23,26 @@ function BacklogContainer({ title, id, issues, role }: ContainerProps) {
   });
 
   return (
-    <div
-      ref={setNodeRef}
-      className="h-[400px]
-  max-h-[400px]
-  flex-col
-  rounded-md
-  border-2
-  dark:bg-slate-700
-  "
-    >
-      <h1 className="bg-gray-500 px-5 py-5 text-xl font-semibold tracking-wide dark:text-white">
-        {title}:
-      </h1>
-      <div className="flex flex-grow flex-col gap-4 overflow-y-auto overflow-x-hidden p-2">
-        {issues.map((issue) => (
-          <IssueItem issue={issue} role={role} key={issue.id} />
-        ))}
+    <>
+      <div className="flex items-center justify-between px-2">
+        <h1 className="text-xl font-semibold tracking-wide dark:text-white">
+          {title}
+        </h1>
+        {isProductOwner && (
+          <AddIssueButton teamUsers={teamUsers} backlog={id} />
+        )}
       </div>
-    </div>
+      <div
+        ref={setNodeRef}
+        className="min-h-[400px] rounded-lg p-6 dark:bg-gray-800"
+      >
+        <div className="flex flex-grow flex-col gap-4">
+          {issues.map((issue) => (
+            <IssueItem issue={issue} key={issue.id} teamUsers={teamUsers} />
+          ))}
+        </div>
+      </div>
+    </>
   );
 }
 

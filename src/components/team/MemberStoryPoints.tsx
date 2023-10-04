@@ -1,5 +1,5 @@
 import React from "react";
-import type { Points } from "~/types";
+import type { Points } from "~/utils/types";
 
 export default function MemberStoryPoints({ points }: { points: Points }) {
   return (

@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { TbLogout2 } from "react-icons/tb";
-import convertRole from "~/components/utils";
+import { convertRole } from "~/utils/funcs";
 
 export default function Navbar() {
   const router = useRouter();
@@ -11,21 +11,15 @@ export default function Navbar() {
 
   return (
     <nav className="border-gray-200 bg-white dark:bg-gray-900">
-      <div className="mx-auto flex max-w-screen-xl flex-wrap items-center justify-between p-4">
-        <Link href="/" className="flex items-center">
+      <div className="mx-auto flex flex-wrap items-center justify-between p-4">
+        <Link href="/" className="flex w-1/4 items-center">
           <span className="self-center whitespace-nowrap text-2xl font-semibold dark:text-white">
             scroom
           </span>
         </Link>
-        <div className="flex items-center md:order-2">
-          <button
-            onClick={() => void signOut()}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700  dark:text-gray-200 "
-          >
-            <TbLogout2 size="2em" />
-          </button>
+        <div className="flex w-1/4 items-center justify-end md:order-3">
           {session?.user.role && (
-            <p className="px-2 dark:text-white">
+            <p className="px-4 dark:text-white">
               {convertRole(session.user.role)}
             </p>
           )}
@@ -39,6 +33,12 @@ export default function Navbar() {
             height="32"
             className="rounded-full"
           />
+          <button
+            onClick={() => void signOut()}
+            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700  dark:text-gray-200 "
+          >
+            <TbLogout2 size="2em" />
+          </button>
         </div>
         {session?.user.teamId && (
           <div

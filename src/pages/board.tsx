@@ -4,10 +4,12 @@ import { getSession } from "next-auth/react";
 import type { Issue, Team } from "@prisma/client";
 import { prisma } from "~/server/db";
 import IssueContainer from "~/components/board/IssueContainer";
-import { DndContext, type DragEndEvent , type DragOverEvent } from "@dnd-kit/core";
-import { columns } from "~/components/board/constants";
-import { arrayMove } from "@dnd-kit/sortable";
-
+import {
+  DndContext,
+  type DragEndEvent,
+  type DragOverEvent,
+} from "@dnd-kit/core";
+import { columns } from "~/utils/constants";
 
 export default function ScrumBoard({
   backendIssues,
@@ -33,10 +35,7 @@ export default function ScrumBoard({
 
   async function onDragEnd(event: DragEndEvent) {
     const { active, over } = event;
-
-    if (!over) {
-      return;
-    }
+    if (!over) return;
 
     const issuesDupe = [...issues];
     const activeIssue = issuesDupe.find(
@@ -53,51 +52,26 @@ export default function ScrumBoard({
     const { active, over } = event;
     if (!over) return;
 
-    const activeId = active.id;
-    const overId = over.id;
-
-
-    if (activeId === overId) return;
-
-    const isActiveAIssue = active.data.current?.type === "Issues";
-    const isOverAIssue = over.data.current?.type === "Issues";
-
-    if (!isActiveAIssue) return;
-
-
-     if (isActiveAIssue && isOverAIssue) {
-      setIssues((issues) => {
-        const activeIndex = issues.findIndex((t) => t.id === activeId);
-        const overIndex = issues.findIndex((t) => t.id === overId);
-
-        issues[activeIndex]!.backlog = issues[overIndex]!.backlog;
-
-        return arrayMove(issues, activeIndex, overIndex);
-      });
-
-    const isOverAContainer = over.data.current?.type === "Container";
-
-
-    if (isActiveAIssue && isOverAContainer) {
-      setIssues((issues) => {
-        const activeIndex = issues.findIndex((t) => t.id === activeId);
-        issues[activeIndex]!.status = over.id as string;
-        return arrayMove(issues, activeIndex, activeIndex);
-      });
+    const issuesDupe = [...issues];
+    const activeIssue = issuesDupe.find(
+      (issue) => issue.id === active.id.toString(),
+    );
+    if (activeIssue) {
+      activeIssue.status = over.id.toString();
+      setIssues(issuesDupe);
     }
   }
-}
 
   return (
     <div className="flex flex-grow flex-col bg-white dark:bg-slate-700">
       <div className="py-4 text-center">
         <h1 className="text-3xl font-bold dark:text-white">Scrum Board</h1>
         <h2 className="text-lg font-semibold text-gray-600 dark:text-gray-400">
-          {team.projectName}, Sprint 0
+          {team.projectName}
         </h2>
       </div>
-      <DndContext onDragEnd={onDragEnd} onDragOver = {onDragOver}>
-        <div className="flex flex-col justify-center gap-4 px-4 md:flex-row">
+      <DndContext onDragEnd={onDragEnd} onDragOver={onDragOver}>
+        <div className="flex flex-col gap-4 px-4 md:flex-row">
           {columns.map((col) => (
             <IssueContainer
               key={col.id}
@@ -137,6 +111,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     },
     where: {
       backlog: "sprint",
+      teamId: session.user.teamId,
     },
     orderBy: {
       estimate: { sort: "desc", nulls: "last" },

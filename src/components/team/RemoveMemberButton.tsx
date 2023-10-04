@@ -35,7 +35,7 @@ export default function RemoveMemberButton({ user }: { user: User }) {
         data-testid="removeMemberButton"
         onClick={() => setIsRemoveModalOpen(true)}
       >
-        <BsFillPersonDashFill size="1.75em" className="dark:stroke-white" />
+        <BsFillPersonDashFill size="1.75em" className="dark:fill-white" />
       </button>
       {isRemoveModalOpen && (
         <Modal title="Confirm Removing Member" onClose={handleClose}>

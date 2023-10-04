@@ -21,7 +21,7 @@ export default function TeamDetailsModal({
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    await fetch(`/api/updateTeam`, {
+    await fetch(`/api/teams/update`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...Object.fromEntries(formData), id: team.id }),
