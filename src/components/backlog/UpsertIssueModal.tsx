@@ -32,7 +32,7 @@ export default function UpsertIssueModal({
     const formData = new FormData(event.currentTarget);
     if (!issue && teamId) {
       await fetch(`/api/issues/create`, {
-        method: "PUT",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...Object.fromEntries(formData), teamId }),
       });
