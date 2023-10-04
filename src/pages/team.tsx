@@ -6,6 +6,7 @@ import UserTable from "~/components/team/UserTable";
 import type { User, Team } from "@prisma/client";
 import ResetTeamButton from "~/components/team/ResetTeamButton";
 import TeamDetailsButton from "~/components/team/TeamDetailsButton";
+import LeaveTeamButton from "~/components/team/LeaveTeamButton";
 
 export default function Team({
   role,
@@ -30,6 +31,7 @@ export default function Team({
         </div>
         {isAdmin && <TeamDetailsButton team={team} />}
         {isAdmin && <ResetTeamButton team={team} />}
+        {!isAdmin && <LeaveTeamButton />}
       </div>
       <UserTable users={users} role={role} />
     </div>
