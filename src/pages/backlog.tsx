@@ -1,33 +1,201 @@
 import { type GetServerSidePropsContext } from "next";
-import { getSession } from "next-auth/react";
-import React from "react";
+import { getSession, useSession } from "next-auth/react";
+import React, { useState } from "react";
+import type { Issue, Team, User } from "@prisma/client";
 import { prisma } from "~/server/db";
-import BacklogSection from "~/components/backlog/BacklogSection";
-import type { Issue, User } from "@prisma/client";
+import { arrayMove } from "@dnd-kit/sortable";
+import BacklogContainer from "~/components/backlog/BacklogContainer";
+import { IssueItem } from "~/components/backlog/IssueItem";
+import { containers } from "~/components/backlog/constants";
+import {
+  DndContext,
+  type DragEndEvent,
+  type DragOverEvent,
+  DragOverlay,
+  type DragStartEvent,
+  PointerSensor,
+  closestCorners,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import UpsertIssueModal from "~/components/backlog/UpsertIssueModal";
 
 export default function Backlog({
-  sprintIssues,
-  productIssues,
+  dataIssues,
+  teamId,
+  team,
   teamUsers,
 }: {
-  sprintIssues: Issue[];
-  productIssues: Issue[];
+  dataIssues: Issue[];
+  teamId: string;
+  team: Team;
   teamUsers: User[];
 }) {
-  return (
-    <div className="flex flex-grow flex-col bg-white dark:bg-slate-700">
-      <BacklogSection
-        issues={sprintIssues}
-        backlog="sprint"
-        teamUsers={teamUsers}
-      />
-      <BacklogSection
-        issues={productIssues}
-        backlog="product"
-        teamUsers={teamUsers}
-      />
-    </div>
+  const [activeIssue, setActiveIssue] = useState<Issue | null>(null);
+  const [activeContainer, setActiveContainer] = useState<string | null>(null);
+  const [showAddIssueModal, setShowAddIssueModal] = useState(false);
+  const [issues, setIssues] = useState<Issue[]>(dataIssues);
+  const { data: session } = useSession();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      // Distance 10 is given so that the object only starts dragging after being moved 10 pixels
+      // Used to allow user to tap on edit button, change the summary etc
+      activationConstraint: {
+        distance: 10,
+      },
+    }),
   );
+
+  const updateIssue = async (
+    issueID: string,
+    summary: string,
+    status: string,
+    backlog: string,
+  ) => {
+    try {
+      const body = { issueID, summary, status, backlog };
+      await fetch(`/api/issues/update`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return (
+    <>
+      <div className="flex flex-grow flex-col bg-white dark:bg-slate-700">
+        <div className="relative flex py-4 text-center">
+          <h1 className="flex-auto text-3xl font-bold dark:text-white">
+            {team.projectName}
+          </h1>
+          <button
+            className="rounded-full bg-gray-800 px-4 py-2 text-white shadow-lg  hover:bg-blue-600"
+            onClick={() => setShowAddIssueModal(true)}
+          >
+            +
+          </button>
+        </div>
+        {showAddIssueModal && (
+          <UpsertIssueModal
+            onClose={() => setShowAddIssueModal(false)}
+            teamId={teamId}
+            teamUsers={teamUsers}
+          />
+        )}
+
+        <div className="bg-white dark:bg-slate-700">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={onDragStart}
+            onDragOver={onDragOver}
+            onDragEnd={onDragEnd}
+          >
+            <div className="grid grid-cols-1 gap-4">
+              {containers.map((container) => (
+                <BacklogContainer
+                  title={container.title}
+                  role={session?.user.role ?? "guest"}
+                  key={container.title}
+                  id={container.id}
+                  issues={issues.filter(
+                    (issue) => issue.backlog === container.id,
+                  )}
+                />
+              ))}
+            </div>
+            <DragOverlay adjustScale={false}>
+              {activeIssue && (
+                <IssueItem issue={activeIssue} teamUsers={teamUsers} />
+              )}
+            </DragOverlay>
+          </DndContext>
+        </div>
+      </div>
+    </>
+  );
+  function onDragStart(event: DragStartEvent) {
+    if (event.active.data.current?.type === "issue") {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      setActiveIssue(event.active.data.current.issue);
+      return;
+    }
+  }
+
+  async function onDragEnd(event: DragEndEvent) {
+    const { over } = event;
+
+    if (over?.data?.current?.type === "issue" && activeIssue) {
+      if (over.data.current.issue) {
+        await updateIssue(
+          activeIssue.id,
+          activeIssue.summary,
+          activeIssue.status ?? "toDo",
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+          over.data.current.issue.backlog,
+        );
+        return;
+      }
+    }
+
+    if (
+      over?.data?.current?.type === "container" &&
+      activeIssue &&
+      activeContainer
+    ) {
+      await updateIssue(
+        activeIssue.id,
+        activeIssue.summary,
+        activeIssue.status ?? "toDo",
+        activeContainer,
+      );
+    }
+
+    setActiveIssue(null);
+    setActiveContainer(null);
+  }
+
+  function onDragOver(event: DragOverEvent) {
+    const { active, over } = event;
+
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    if (activeId === overId) return;
+
+    const isActiveAIssue = active.data.current?.type === "issue";
+    const isOverAIssue = over.data.current?.type === "issue";
+
+    if (!isActiveAIssue) return;
+
+    if (isActiveAIssue && isOverAIssue) {
+      setIssues((issues) => {
+        const activeIndex = issues.findIndex((t) => t.id === activeId);
+        const overIndex = issues.findIndex((t) => t.id === overId);
+
+        issues[activeIndex]!.backlog = issues[overIndex]!.backlog;
+
+        return arrayMove(issues, activeIndex, overIndex);
+      });
+    }
+
+    const isOverAContainer = over.data.current?.type === "container";
+
+    if (isActiveAIssue && isOverAContainer) {
+      setIssues((issues) => {
+        const activeIndex = issues.findIndex((t) => t.id === activeId);
+        issues[activeIndex]!.backlog = over.id as string;
+        setActiveContainer(over.id as string);
+        return arrayMove(issues, activeIndex, activeIndex);
+      });
+    }
+  }
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
@@ -49,7 +217,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     };
   }
 
-  const sprintIssues = await prisma.issue.findMany({
+  const teamId = session.user.teamId;
+
+  const dataIssues = await prisma.issue.findMany({
     select: {
       id: true,
       status: true,
@@ -61,31 +231,18 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       userId: true,
     },
     where: {
-      teamId: session.user.teamId,
-      backlog: "sprint",
-    },
-    orderBy: {
-      summary: "asc",
+      teamId: teamId,
     },
   });
 
-  const productIssues = await prisma.issue.findMany({
+  const team = await prisma.team.findUnique({
     select: {
       id: true,
-      status: true,
-      backlog: true,
-      summary: true,
-      teamId: true,
-      estimate: true,
-      type: true,
-      userId: true,
+      name: true,
+      projectName: true,
     },
     where: {
-      teamId: session.user.teamId,
-      backlog: "product",
-    },
-    orderBy: {
-      summary: "asc",
+      id: teamId,
     },
   });
 
@@ -103,9 +260,10 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   return {
     props: {
-      sprintIssues,
-      productIssues,
       teamUsers,
+      dataIssues,
+      teamId,
+      team,
     },
   };
 }

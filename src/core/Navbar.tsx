@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { TbLogout2 } from "react-icons/tb";
+import convertRole from "~/components/utils";
 
 export default function Navbar() {
   const router = useRouter();
@@ -23,6 +24,11 @@ export default function Navbar() {
           >
             <TbLogout2 size="2em" />
           </button>
+          {session?.user.role && (
+            <p className="px-2 dark:text-white">
+              {convertRole(session.user.role)}
+            </p>
+          )}
           <Image
             alt="avatar"
             src={
