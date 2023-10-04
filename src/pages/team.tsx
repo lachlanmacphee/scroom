@@ -9,6 +9,7 @@ import { type GetServerSidePropsContext } from "next";
 import UserTable from "~/components/team/UserTable";
 import ResetTeamButton from "~/components/team/ResetTeamButton";
 import TeamDetailsButton from "~/components/team/TeamDetailsButton";
+import InviteMemberButton from "~/components/team/InviteMemberButton";
 import LeaveTeamButton from "~/components/team/LeaveTeamButton";
 import calculatePoints from "~/components/team/calculatePoints";
 
@@ -25,8 +26,8 @@ export default function Team({
 }) {
   const isAdmin = role === "admin";
   return (
-    <div className="flex flex-grow flex-col bg-white dark:bg-slate-700 ">
-      <div className="mb-4 mt-6 flex items-center justify-center gap-3">
+    <>
+      <div className="flex flex-grow flex-col bg-white dark:bg-slate-700 ">
         <div className="text-center">
           <h1 className="text-4xl font-semibold tracking-wide dark:text-white">
             {team.name}
@@ -38,9 +39,10 @@ export default function Team({
         {isAdmin && <TeamDetailsButton team={team} />}
         {isAdmin && <ResetTeamButton team={team} />}
         {!isAdmin && <LeaveTeamButton />}
+        {isAdmin && <InviteMemberButton team={team} />}
       </div>
       <UserTable users={users} role={role} pointsDict={pointsDict} />
-    </div>
+    </>
   );
 }
 

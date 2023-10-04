@@ -50,3 +50,11 @@ test("can see user completed and total points", async ({ page }) => {
   await page.goto("/team");
   await expect(page.getByTestId("memberStoryPoints")).toBeVisible();
 });
+
+test("Invite user to team", async ({ page }) => {
+  await page.goto("/team");
+  await page.getByTestId("inviteTeamMemberButton").click();
+  await page.getByTestId("toEmailField").fill("jmos0011@student.monash.edu");
+  await page.getByText("Send").click();
+  await expect(page.getByTestId("inviteMemberModal")).not.toBeVisible();
+});

@@ -46,7 +46,7 @@ export default async function globalSetup() {
       },
     },
     update: {
-      role: "productOwner",
+      role: "admin",
     },
   });
 
