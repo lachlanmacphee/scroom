@@ -1,21 +1,27 @@
-import { type GetServerSidePropsContext } from "next";
-import { getSession } from "next-auth/react";
 import React from "react";
+import { getSession } from "next-auth/react";
 import { prisma } from "~/server/db";
-import UserTable from "~/components/team/UserTable";
+
 import type { User, Team } from "@prisma/client";
+import type { PointsDict } from "~/types";
+import { type GetServerSidePropsContext } from "next";
+
+import UserTable from "~/components/team/UserTable";
 import ResetTeamButton from "~/components/team/ResetTeamButton";
 import TeamDetailsButton from "~/components/team/TeamDetailsButton";
 import LeaveTeamButton from "~/components/team/LeaveTeamButton";
+import calculatePoints from "~/components/team/calculatePoints";
 
 export default function Team({
   role,
   users,
   team,
+  pointsDict,
 }: {
   role: string;
   users: User[];
   team: Team;
+  pointsDict: PointsDict;
 }) {
   const isAdmin = role === "admin";
   return (
@@ -33,7 +39,7 @@ export default function Team({
         {isAdmin && <ResetTeamButton team={team} />}
         {!isAdmin && <LeaveTeamButton />}
       </div>
-      <UserTable users={users} role={role} />
+      <UserTable users={users} role={role} pointsDict={pointsDict} />
     </div>
   );
 }
@@ -58,13 +64,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   }
 
   const users = await prisma.user.findMany({
-    select: {
-      id: true,
-      name: true,
-      role: true,
-      image: true,
-      email: true,
-    },
     where: {
       teamId: session.user.teamId,
     },
@@ -74,17 +73,21 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   });
 
   const team = await prisma.team.findUnique({
-    select: {
-      id: true,
-      name: true,
-      projectName: true,
-    },
     where: {
       id: session.user.teamId,
     },
   });
 
+  const issues = await prisma.issue.findMany({
+    where: {
+      teamId: session.user.teamId,
+      backlog: "sprint",
+    },
+  });
+
+  const pointsDict: PointsDict = calculatePoints(users, issues);
+
   return {
-    props: { role: session.user.role, users, team },
+    props: { role: session.user.role, users, team, pointsDict },
   };
 }
