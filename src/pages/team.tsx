@@ -29,19 +29,21 @@ export default function Team({
   const users: User[] = SuperJSON.parse(usersJSON);
   return (
     <div className="flex flex-grow flex-col bg-white px-8 dark:bg-slate-700 ">
-      <div className="mb-4 mt-6 flex items-center justify-center gap-3">
+      <div className="mb-4 mt-6 flex flex-col items-center justify-center gap-6">
         <div className="text-center">
-          <h1 className="text-4xl font-semibold tracking-wide dark:text-white">
+          <h1 className="text-5xl font-semibold tracking-wide dark:text-white">
             {team.name}
           </h1>
-          <h2 className=" text-3xl tracking-wide dark:text-gray-400">
+          <h2 className=" text-4xl tracking-wide dark:text-gray-400">
             {team.projectName}
           </h2>
         </div>
-        {isAdmin && <TeamDetailsButton team={team} />}
-        {isAdmin && <ResetTeamButton team={team} />}
-        {!isAdmin && <LeaveTeamButton />}
-        {isAdmin && <InviteMemberButton team={team} />}
+        <div className="flex gap-3">
+          {isAdmin && <TeamDetailsButton team={team} />}
+          {isAdmin && <ResetTeamButton team={team} />}
+          {!isAdmin && <LeaveTeamButton />}
+          {isAdmin && <InviteMemberButton team={team} />}
+        </div>
       </div>
       <UserTable users={users} role={role} pointsDict={pointsDict} />
     </div>

@@ -45,6 +45,9 @@ export default function UserRow({
         </div>
       </div>
       <div className="flex gap-4">
+        {user.role !== "admin" && role === "admin" && (
+          <RemoveMemberButton user={user} />
+        )}
         {role === "admin" && (
           <div className="flex space-x-4">
             <select
@@ -63,9 +66,6 @@ export default function UserRow({
           </div>
         )}
         {userPoints && <MemberStoryPoints points={userPoints} />}
-        {user.role !== "admin" && role === "admin" && (
-          <RemoveMemberButton user={user} />
-        )}
       </div>
     </div>
   );

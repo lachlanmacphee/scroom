@@ -2,12 +2,12 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
-
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "mysql"
+  url = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 model Account {
@@ -26,6 +26,7 @@ model Account {
     user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@unique([provider, providerAccountId])
+    @@index([userId])
 }
 
 model Session {
@@ -34,6 +35,8 @@ model Session {
     userId       String
     expires      DateTime
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
 }
 
 model User {
@@ -48,6 +51,8 @@ model User {
     accounts      Account[]
     sessions      Session[]
     issues        Issue[]
+
+    @@index([teamId])
 }
 
 model VerificationToken {
@@ -77,4 +82,7 @@ model Issue {
     userId   String?
     assignee User?   @relation(fields: [userId], references: [id])
     team     Team    @relation(fields: [teamId], references: [id])
+
+    @@index([teamId])
+    @@index([userId])
 }
