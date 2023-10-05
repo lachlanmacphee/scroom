@@ -6,6 +6,8 @@ export function convertRole(role: string) {
   if (role === "admin") return "Admin";
   if (role === "scrumMaster") return "Scrum Master";
   if (role === "guest") return "Guest";
+  if (role === "developer") return "Developer";
+  if (role === "proxyProductOwner") return "Proxy PO";
 }
 
 export function calculatePoints(users: User[], issues: Issue[]) {
