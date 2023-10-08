@@ -27,6 +27,7 @@ export default function Team({
 }) {
   const isAdmin = role === "admin";
   const users: User[] = SuperJSON.parse(usersJSON);
+
   return (
     <div className="flex flex-grow flex-col bg-white px-8 dark:bg-slate-700 ">
       <div className="mb-4 mt-6 flex flex-col items-center justify-center gap-6">
@@ -79,6 +80,11 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   });
 
   const team = await prisma.team.findUnique({
+    select: {
+      id: true,
+      name: true,
+      projectName: true,
+    },
     where: {
       id: session.user.teamId,
     },

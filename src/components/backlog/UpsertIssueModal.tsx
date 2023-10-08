@@ -1,11 +1,16 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import React, { type FormEvent } from "react";
+import React from "react";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
+import { useForm } from "react-hook-form";
 import { type Issue, type User } from "@prisma/client";
 import Modal from "../common/Modal";
-
-type onClose = () => void;
+import { api } from "~/utils/api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  type onClose,
+  issueFormSchema,
+  type IssueFormSchema,
+} from "~/utils/types";
 
 export default function UpsertIssueModal({
   onClose,
@@ -22,24 +27,36 @@ export default function UpsertIssueModal({
 }) {
   const { data: session } = useSession();
   const router = useRouter();
+  const createMutation = api.issue.create.useMutation();
+  const updateMutation = api.issue.update.useMutation();
 
-  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+  const { register, handleSubmit } = useForm<IssueFormSchema>({
+    resolver: zodResolver(issueFormSchema),
+    defaultValues: {
+      summary: issue?.summary ?? "",
+      status: issue?.status ?? "toDo",
+      backlog: issue?.backlog ?? backlog,
+      assignee: issue?.userId ?? "",
+      type: issue?.type ?? "task",
+      estimate: issue?.estimate?.toString() ?? "0",
+    },
+  });
+
+  const onSubmit = async (data: IssueFormSchema) => {
     if (!issue && teamId) {
-      await fetch(`/api/issues/create`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...Object.fromEntries(formData), teamId }),
+      createMutation.mutate({
+        teamId,
+        status: data.status,
+        summary: data.summary,
+        backlog: data.backlog,
       });
-    } else if (issue?.id) {
-      await fetch(`/api/issues/update`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...Object.fromEntries(formData),
-          issueID: issue.id,
-        }),
+    } else if (issue?.id && teamId) {
+      updateMutation.mutate({
+        id: issue.id,
+        status: data.status,
+        summary: data.summary,
+        backlog: data.backlog,
+        teamId,
       });
     }
     onClose();
@@ -48,28 +65,27 @@ export default function UpsertIssueModal({
 
   return (
     <Modal title={issue ? "Edit Issue" : "Create Issue"} onClose={onClose}>
-      <form onSubmit={onSubmit} className="flex flex-col gap-4 p-4">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col gap-4 p-4"
+      >
         <div className="flex flex-col gap-2">
           <div className="flex justify-between gap-2">
             <label className="font-bold dark:text-white">Summary</label>
             <input
               className="w-3/4 rounded-md border border-gray-900 pl-1"
-              type="text"
-              name="summary"
               data-testid="summary"
-              defaultValue={issue?.summary ?? ""}
-              required
+              {...register("summary", { required: true })}
             />
           </div>
           {backlog === "sprint" && (
             <div className="flex justify-between gap-2">
               <label className="font-bold dark:text-white">Status</label>
               <select
-                name="status"
                 id="status"
                 data-testid="status"
-                defaultValue={issue?.status ?? "toDo"}
                 className="w-3/4 rounded-md border border-gray-900"
+                {...register("status")}
               >
                 <option value="toDo">To Do</option>
                 <option value="inProgress">In Progress</option>
@@ -81,11 +97,10 @@ export default function UpsertIssueModal({
             <div className="flex justify-between gap-2">
               <label className="font-bold dark:text-white">Backlog</label>
               <select
-                name="backlog"
                 id="backlog"
                 data-testid="backlog"
                 className="w-3/4 rounded-md border border-gray-900"
-                defaultValue={issue?.backlog ?? backlog}
+                {...register("backlog")}
               >
                 <option value="sprint">Sprint Backlog</option>
                 <option value="product">Product Backlog</option>
@@ -95,11 +110,10 @@ export default function UpsertIssueModal({
           <div className="flex justify-between gap-2">
             <label className="font-bold dark:text-white">Assignee</label>
             <select
-              name="userId"
               id="assignee"
               data-testid="assignee"
-              defaultValue={issue?.userId ?? ""}
               className="w-3/4 rounded-md border border-gray-900"
+              {...register("assignee")}
             >
               <option value="">Unassigned</option>
               {teamUsers.map((user) => (
@@ -112,11 +126,10 @@ export default function UpsertIssueModal({
           <div className="flex justify-between gap-2">
             <label className="font-bold dark:text-white">Type</label>
             <select
-              name="type"
               id="type"
               data-testid="type"
-              defaultValue={issue?.type ?? "task"}
               className="w-3/4 rounded-md border border-gray-900"
+              {...register("type")}
             >
               <option value="task">Task</option>
               <option value="story">Story</option>
@@ -126,12 +139,10 @@ export default function UpsertIssueModal({
           <div className="flex justify-between gap-2">
             <label className="font-bold dark:text-white">Estimate</label>
             <input
-              name="estimate"
               type="number"
               data-testid="estimate"
-              min="0"
               className="w-3/4 rounded-md border border-gray-900 pl-1"
-              defaultValue={issue?.estimate ?? "0"}
+              {...register("estimate", { min: "0" })}
             />
           </div>
         </div>

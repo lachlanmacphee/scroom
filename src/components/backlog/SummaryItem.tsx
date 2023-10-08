@@ -1,54 +1,42 @@
 import { type Issue } from "@prisma/client";
-import React, { useState } from "react";
-
-type updateIssue = (
-  issueID: string,
-  summary: string,
-  status: string,
-  backlog: string,
-) => Promise<void>;
+import React, { useEffect, useState } from "react";
+import { type UpdateIssue } from "~/utils/types";
 
 function SummaryItem({
   issue,
   updateIssue,
 }: {
   issue: Issue;
-  updateIssue: updateIssue;
+  updateIssue: UpdateIssue;
 }) {
-  const [activeName, setActiveName] = useState("");
+  const [activeName, setActiveName] = useState(issue.summary);
   const [editMode, setEditMode] = useState(false);
 
-  function handleOnClick(issue: Issue) {
+  useEffect(() => {
     setActiveName(issue.summary);
-    setEditMode(true);
-  }
+  }, [issue.summary]);
 
   return (
     <p
       className="flex-auto space-x-2 px-2 dark:text-white"
-      onClick={() => handleOnClick(issue)}
+      onClick={() => setEditMode(true)}
     >
-      {!editMode && issue.summary}
+      {!editMode && activeName}
       {editMode && (
         <input
-          className="rounded border bg-black px-2 outline-none"
+          className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
           value={activeName}
           onChange={(e) => setActiveName(e.target.value)}
           autoFocus
           onBlur={() => {
+            updateIssue({ id: issue.id, summary: activeName });
             setEditMode(false);
           }}
-          onKeyDown={async (e) => {
+          onKeyDown={(e) => {
             if (e.key !== "Enter") {
               return;
             }
-            issue.summary = activeName;
-            await updateIssue(
-              issue.id,
-              activeName,
-              issue.status ?? "todo",
-              issue.backlog,
-            );
+            updateIssue({ id: issue.id, summary: activeName });
             setEditMode(false);
           }}
         />

@@ -3,26 +3,19 @@ import { useRouter } from "next/router";
 import Modal from "../common/Modal";
 import { type Team } from "@prisma/client";
 import { FiRotateCcw } from "react-icons/fi";
+import { api } from "~/utils/api";
 
 export default function ResetTeamButton({ team }: { team: Team }) {
   const router = useRouter();
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [reset, setReset] = useState("");
+  const resetMutation = api.team.reset.useMutation();
 
-  const handleResetTeam = async () => {
-    try {
-      const body = { teamId: team.id };
-      await fetch(`/api/teams/reset`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      setIsResetModalOpen(false);
-      await router.replace(router.asPath);
-    } catch (error) {
-      console.error("Error resetting team:", error);
-    }
-  };
+  async function handleResetTeam() {
+    resetMutation.mutate({ teamId: team.id });
+    handleClose();
+    await router.replace(router.asPath);
+  }
 
   const handleClose = () => {
     setReset("");

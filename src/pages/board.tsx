@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { type GetServerSidePropsContext } from "next";
-import { getSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import type { Issue, Team } from "@prisma/client";
-import { prisma } from "~/server/db";
 import IssueContainer from "~/components/board/IssueContainer";
 import {
   DndContext,
@@ -10,6 +9,8 @@ import {
   type DragOverEvent,
 } from "@dnd-kit/core";
 import { columns } from "~/utils/constants";
+import { prisma } from "~/server/db";
+import { api } from "~/utils/api";
 
 export default function ScrumBoard({
   backendIssues,
@@ -19,21 +20,16 @@ export default function ScrumBoard({
   team: Team;
 }) {
   const [issues, setIssues] = useState(backendIssues);
+  const updateMutation = api.issue.update.useMutation();
+  const { data: session } = useSession();
 
-  const updateIssue = async (issueID: string, status: string) => {
-    try {
-      const body = { issueID, status };
-      await fetch(`/api/issues/update`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-    } catch (error) {
-      console.error(error);
-    }
+  const updateIssue = (id: string, status: string) => {
+    const teamId = session?.user.teamId;
+    if (!teamId) return;
+    updateMutation.mutate({ id, status, teamId });
   };
 
-  async function onDragEnd(event: DragEndEvent) {
+  function onDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over) return;
 
@@ -44,7 +40,7 @@ export default function ScrumBoard({
     if (activeIssue) {
       activeIssue.status = over.id.toString();
       setIssues(issuesDupe);
-      await updateIssue(active.id.toString(), over.id.toString());
+      updateIssue(active.id.toString(), over.id.toString());
     }
   }
 
