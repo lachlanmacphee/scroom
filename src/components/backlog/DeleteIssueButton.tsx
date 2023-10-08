@@ -1,17 +1,14 @@
 import { type Issue } from "@prisma/client";
 import { useRouter } from "next/router";
 import { ImBin } from "react-icons/im";
+import { api } from "~/utils/api";
 
 export default function DeleteIssueButton({ issue }: { issue: Issue }) {
   const router = useRouter();
+  const deleteMutation = api.issue.delete.useMutation();
 
   const deleteHandler = async () => {
-    console.log("calling delete handler");
-    await fetch(`/api/issues/delete`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ issueId: issue.id }),
-    });
+    deleteMutation.mutate({ id: issue.id });
     await router.replace(router.asPath);
   };
 

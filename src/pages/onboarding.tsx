@@ -4,45 +4,36 @@ import { useRouter } from "next/router";
 
 import JoinTeam from "~/components/onboarding/joinTeam";
 import NewTeam from "~/components/onboarding/newTeam";
-
+import { api } from "~/utils/api";
 export default function Onboarding() {
   const router = useRouter();
 
   let { teamId } = router.query;
   const { data: session, update } = useSession();
+  const userId = session?.user.id;
+  const createMutation = api.team.create.useMutation();
+  const joinMutation = api.user.joinTeam.useMutation();
 
   if (Array.isArray(teamId)) {
     teamId = teamId[0];
   }
 
   const handleNewTeamSubmit = async (teamName: string, projectName: string) => {
-    try {
-      const body = { teamName, projectName, userId: session?.user.id };
-      await fetch(`/api/teams/create`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      await router.push("/");
-      await update();
-    } catch (error) {
-      console.error(error);
+    if (!userId) {
+      return;
     }
+    createMutation.mutate({ name: teamName, projectName, userId });
+    await router.push("/");
+    await update();
   };
 
   const handleJoinTeamSubmit = async (teamCode: string) => {
-    try {
-      const body = { teamCode, userId: session?.user.id };
-      await fetch(`/api/teams/join`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      await router.push("/");
-      await update();
-    } catch (error) {
-      console.error(error);
+    if (!userId) {
+      return;
     }
+    joinMutation.mutate({ teamId: teamCode, userId, role: "guest" });
+    await router.push("/");
+    await update();
   };
 
   return (

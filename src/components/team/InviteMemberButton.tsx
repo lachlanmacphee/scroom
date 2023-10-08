@@ -2,31 +2,32 @@ import { useRouter } from "next/router";
 import Modal from "../common/Modal";
 import { type Team } from "@prisma/client";
 import React, { useState } from "react";
-import { type FormEvent } from "react";
 import { FiUserPlus } from "react-icons/fi";
+import { api } from "~/utils/api";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { inviteMemberSchema, type InviteMemberSchema } from "~/utils/types";
 
 export default function InviteMemberButton({ team }: { team: Team }) {
   const router = useRouter();
   const [isInviteTeamMemberModalOpen, setIsInviteTeamMemberModalOpen] =
     useState(false);
-  const refreshData = async () => {
-    await router.replace(router.asPath);
-  };
+  const inviteMutation = api.team.invite.useMutation();
 
-  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    await fetch(`/api/teams/invite`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...Object.fromEntries(formData),
-        teamId: team.id,
-        teamName: team.name,
-      }),
+  const { register, handleSubmit } = useForm<InviteMemberSchema>({
+    resolver: zodResolver(inviteMemberSchema),
+  });
+
+  const onSubmit = async (data: InviteMemberSchema) => {
+    inviteMutation.mutate({
+      teamId: team.id,
+      toEmail: data.toEmail,
+      teamName: team.name,
+      // Replace this next line with code to get the domain (eg scroom-xi.vercel.app or localhost:3000)
+      windowUrl: "localhost:3000",
     });
     setIsInviteTeamMemberModalOpen(false);
-    await refreshData();
+    await router.replace(router.asPath);
   };
 
   const handleClose = () => {
@@ -46,16 +47,18 @@ export default function InviteMemberButton({ team }: { team: Team }) {
           title="Invite New Team Member"
           data-testid="inviteMemberModal"
         >
-          <form onSubmit={onSubmit} className="flex flex-col gap-4 p-4">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col gap-4 p-4"
+          >
             <div className="flex flex-col gap-1">
               <label className="dark:text-white">Team Members Email</label>
               <input
-                name="toEmail"
                 type="email"
                 data-testid="toEmailField"
                 placeholder="john.smith@email.com"
                 className="pl-2"
-                required
+                {...register("toEmail", { required: true })}
               />
             </div>
             <div className="flex items-center justify-end space-x-2">

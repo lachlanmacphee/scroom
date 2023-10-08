@@ -1,6 +1,8 @@
-import { type GetServerSidePropsContext } from "next";
-import { getSession } from "next-auth/react";
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import React, { useEffect, useState } from "react";
+import { type GetServerSidePropsContext } from "next";
+import { getSession, useSession } from "next-auth/react";
 import type { Issue, Team, User } from "@prisma/client";
 import { prisma } from "~/server/db";
 import { arrayMove } from "@dnd-kit/sortable";
@@ -18,6 +20,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { api } from "~/utils/api";
 
 export default function Backlog({
   dataIssues,
@@ -32,6 +35,8 @@ export default function Backlog({
   const [activeIssue, setActiveIssue] = useState<Issue | null>(null);
   const [activeContainer, setActiveContainer] = useState<string | null>(null);
   const [issues, setIssues] = useState<Issue[]>(dataIssues);
+  const updateMutation = api.issue.update.useMutation();
+  const { data: session } = useSession();
 
   useEffect(() => {
     setIssues(dataIssues);
@@ -47,22 +52,21 @@ export default function Backlog({
     }),
   );
 
-  const updateIssue = async (
-    issueID: string,
-    summary: string,
-    status: string,
-    backlog: string,
-  ) => {
-    try {
-      const body = { issueID, summary, status, backlog };
-      await fetch(`/api/issues/update`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-    } catch (error) {
-      console.error(error);
-    }
+  const updateIssue = ({
+    id,
+    summary,
+    status,
+    backlog,
+  }: {
+    id: string;
+    summary?: string;
+    status?: string;
+    backlog?: string;
+  }) => {
+    const teamId = session?.user.teamId;
+    if (!teamId) return;
+    const body = { id, summary, status, backlog, teamId };
+    updateMutation.mutate(body);
   };
 
   return (
@@ -87,12 +91,17 @@ export default function Backlog({
               id={container.id}
               issues={issues.filter((issue) => issue.backlog === container.id)}
               teamUsers={teamUsers}
+              updateIssue={updateIssue}
             />
           ))}
         </div>
         <DragOverlay adjustScale={false}>
           {activeIssue && (
-            <IssueItem issue={activeIssue} teamUsers={teamUsers} />
+            <IssueItem
+              issue={activeIssue}
+              teamUsers={teamUsers}
+              updateIssue={updateIssue}
+            />
           )}
         </DragOverlay>
       </DndContext>
@@ -106,18 +115,17 @@ export default function Backlog({
     }
   }
 
-  async function onDragEnd(event: DragEndEvent) {
+  function onDragEnd(event: DragEndEvent) {
     const { over } = event;
 
     if (over?.data?.current?.type === "issue" && activeIssue) {
-      if (over.data.current.issue) {
-        await updateIssue(
-          activeIssue.id,
-          activeIssue.summary,
-          activeIssue.status ?? "toDo",
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-          over.data.current.issue.backlog,
-        );
+      if (over.data.current.issue.backlog) {
+        updateIssue({
+          id: activeIssue.id,
+          summary: activeIssue.summary,
+          status: activeIssue.status ?? "toDo",
+          backlog: over.data.current.issue.backlog,
+        });
         return;
       }
     }
@@ -127,12 +135,12 @@ export default function Backlog({
       activeIssue &&
       activeContainer
     ) {
-      await updateIssue(
-        activeIssue.id,
-        activeIssue.summary,
-        activeIssue.status ?? "toDo",
-        activeContainer,
-      );
+      updateIssue({
+        id: activeIssue.id,
+        summary: activeIssue.summary,
+        status: activeIssue.status ?? "toDo",
+        backlog: activeContainer,
+      });
     }
 
     setActiveIssue(null);

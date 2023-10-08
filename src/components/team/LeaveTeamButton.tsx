@@ -3,12 +3,14 @@ import { useRouter } from "next/router";
 import Modal from "../common/Modal";
 import { BsFillPersonDashFill } from "react-icons/bs";
 import { useSession } from "next-auth/react";
+import { api } from "~/utils/api";
 
 export default function LeaveTeamButton() {
   const router = useRouter();
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const [leave, setLeave] = useState("");
   const { data: session } = useSession();
+  const leaveMutation = api.team.remove.useMutation();
 
   const handleClose = () => {
     setLeave("");
@@ -16,18 +18,10 @@ export default function LeaveTeamButton() {
   };
 
   const handleLeaveTeam = async () => {
-    try {
-      const body = { userId: session?.user.id };
-      await fetch(`/api/teams/remove`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      await router.replace(router.asPath);
-      handleClose();
-    } catch (error) {
-      console.error("Error leaving team:", error);
-    }
+    if (!session?.user.id) return;
+    leaveMutation.mutate({ userId: session?.user.id });
+    handleClose();
+    await router.replace(router.asPath);
   };
 
   return (

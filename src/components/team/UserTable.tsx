@@ -5,6 +5,7 @@ import type { PointsDict } from "~/utils/types";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { sortUsers } from "~/utils/funcs";
+import { api } from "~/utils/api";
 
 export default function UserTable({
   users,
@@ -19,15 +20,12 @@ export default function UserTable({
   const { update } = useSession();
   const [sortOrder, setSortOrder] = useState("alphabetical");
   const sortedUsers = sortUsers({ users, sortOrder, pointsDict });
+  const updateMutation = api.user.update.useMutation();
 
   const handleRoleChange = async (id: string, newRole: string) => {
     try {
       const body = { id, role: newRole };
-      await fetch(`/api/users/update`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+      updateMutation.mutate(body);
       await router.replace(router.asPath);
       await update();
     } catch (error) {

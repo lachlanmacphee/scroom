@@ -1,25 +1,28 @@
 import React, { useState } from "react";
 import type { Issue, User } from "@prisma/client";
-import { useRouter } from "next/router";
 import UpsertIssueModal from "./UpsertIssueModal";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import clsx from "clsx";
 import SummaryItem from "./SummaryItem";
-import StatusDropDown from "./StatusDropDown";
+import StatusDropdown from "./StatusDropdown";
 import EditIssueButton from "./EditIssueButton";
 import { useSession } from "next-auth/react";
 import DeleteIssueButton from "./DeleteIssueButton";
+import { type UpdateIssue } from "~/utils/types";
 
 export function IssueItem({
   issue,
   teamUsers,
+  updateIssue,
 }: {
   issue: Issue;
   teamUsers: User[];
+  updateIssue: UpdateIssue;
 }) {
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
   const { data: session } = useSession();
+
   const {
     attributes,
     listeners,
@@ -40,33 +43,8 @@ export function IssueItem({
     transform: CSS.Transform.toString(transform),
   };
 
-  const router = useRouter();
-
-  const updateIssueHandler = async (status: string) => {
-    await updateIssue(issue.id, issue.summary, status, issue.backlog);
-  };
-
   const editIssueHandler = () => {
     setIsIssueModalOpen(true);
-  };
-
-  const updateIssue = async (
-    issueID: string,
-    summary: string,
-    status: string,
-    backlog: string,
-  ) => {
-    try {
-      const body = { issueID, summary, status, backlog };
-      await fetch(`/api/issues/update`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      await router.replace(router.asPath);
-    } catch (error) {
-      console.error(error);
-    }
   };
 
   if (session?.user.role === "productOwner") {
@@ -83,7 +61,7 @@ export function IssueItem({
       >
         <SummaryItem issue={issue} updateIssue={updateIssue} />
         <div className="flex gap-2">
-          <StatusDropDown issue={issue} clickHandler={updateIssueHandler} />
+          <StatusDropdown issue={issue} updateIssue={updateIssue} />
           <EditIssueButton editHandler={editIssueHandler} />
           <DeleteIssueButton issue={issue} />
         </div>
@@ -110,7 +88,7 @@ export function IssueItem({
     >
       <SummaryItem issue={issue} updateIssue={updateIssue} />
       <div className="flex gap-4">
-        <StatusDropDown issue={issue} clickHandler={updateIssueHandler} />
+        <StatusDropdown issue={issue} updateIssue={updateIssue} />
         <EditIssueButton editHandler={editIssueHandler} />
       </div>
       {isIssueModalOpen && (
