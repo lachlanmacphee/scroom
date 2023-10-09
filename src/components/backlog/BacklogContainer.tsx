@@ -2,7 +2,6 @@ import React from "react";
 import type { Issue, User } from "@prisma/client";
 import { IssueItem } from "./IssueItem";
 import { useDroppable } from "@dnd-kit/core";
-import { useSession } from "next-auth/react";
 import AddIssueButton from "./AddIssueButton";
 import { type UpdateIssue } from "~/utils/types";
 
@@ -21,8 +20,6 @@ function BacklogContainer({
   teamUsers,
   updateIssue,
 }: ContainerProps) {
-  const { data: session } = useSession();
-  const isProductOwner = session?.user.role === "productOwner";
   const { setNodeRef } = useDroppable({
     id: id,
     data: {
@@ -33,15 +30,17 @@ function BacklogContainer({
   return (
     <>
       <div className="flex items-center justify-between px-2">
-        <h1 className="text-xl font-semibold tracking-wide dark:text-white">
+        <h1
+          id={id}
+          className="text-xl font-semibold tracking-wide dark:text-white"
+        >
           {title}
         </h1>
-        {isProductOwner && (
-          <AddIssueButton teamUsers={teamUsers} backlog={id} />
-        )}
+        <AddIssueButton teamUsers={teamUsers} backlog={id} />
       </div>
       <div
         ref={setNodeRef}
+        id={`${id}-container`}
         className="min-h-[400px] rounded-lg p-6 dark:bg-gray-800"
       >
         <div className="flex flex-grow flex-col gap-4">

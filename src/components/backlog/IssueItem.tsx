@@ -47,55 +47,29 @@ export function IssueItem({
     setIsIssueModalOpen(true);
   };
 
-  if (session?.user.role === "productOwner") {
-    return (
-      <div
-        {...listeners}
-        ref={setNodeRef}
-        {...attributes}
-        style={style}
-        className={clsx(
-          "text-md flex h-[60px] cursor-grab flex-col items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white p-3 shadow dark:border-gray-700 dark:bg-gray-700 md:flex-row md:gap-0",
-          isDragging && "opacity-50",
-        )}
-      >
-        <SummaryItem issue={issue} updateIssue={updateIssue} />
-        <div className="flex gap-2">
-          <StatusDropdown issue={issue} updateIssue={updateIssue} />
-          <EditIssueButton editHandler={editIssueHandler} />
-          <DeleteIssueButton issue={issue} />
-        </div>
-        {isIssueModalOpen && (
-          <UpsertIssueModal
-            onClose={() => setIsIssueModalOpen(false)}
-            issue={issue}
-            teamUsers={teamUsers}
-          />
-        )}
-      </div>
-    );
-  }
-
   return (
     <div
+      {...listeners}
       ref={setNodeRef}
-      style={style}
       {...attributes}
+      style={style}
       className={clsx(
-        "text-md flex h-[60px] cursor-grab items-center justify-between rounded-md p-2 font-bold dark:bg-slate-700",
+        "text-md flex h-[60px] cursor-grab flex-col items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white p-3 shadow dark:border-gray-700 dark:bg-gray-700 md:flex-row md:gap-0",
         isDragging && "opacity-50",
       )}
     >
       <SummaryItem issue={issue} updateIssue={updateIssue} />
-      <div className="flex gap-4">
+      <div className="flex gap-2">
         <StatusDropdown issue={issue} updateIssue={updateIssue} />
         <EditIssueButton editHandler={editIssueHandler} />
+        <DeleteIssueButton issue={issue} />
       </div>
       {isIssueModalOpen && (
         <UpsertIssueModal
           onClose={() => setIsIssueModalOpen(false)}
-          teamUsers={teamUsers}
           issue={issue}
+          teamUsers={teamUsers}
+          teamId={session?.user.teamId}
         />
       )}
     </div>

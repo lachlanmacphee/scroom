@@ -55,6 +55,7 @@ export default function Navbar() {
                       : "text-gray-900 dark:text-white"
                   } rounded px-3 py-2 md:p-0`}
                   aria-current="page"
+                  id="navbar-dashboard"
                 >
                   Dashboard
                 </Link>
@@ -67,6 +68,7 @@ export default function Navbar() {
                       ? "text-blue-500"
                       : "text-gray-900 dark:text-white"
                   } rounded px-3 py-2 md:p-0`}
+                  id="navbar-backlog"
                 >
                   Backlog
                 </Link>
@@ -79,8 +81,9 @@ export default function Navbar() {
                       ? "text-blue-500"
                       : "text-gray-900 dark:text-white"
                   } rounded px-3 py-2 md:p-0`}
+                  id="navbar-board"
                 >
-                  Scrum Board
+                  Board
                 </Link>
               </li>
               <li>
@@ -91,6 +94,7 @@ export default function Navbar() {
                       ? "text-blue-500"
                       : "text-gray-900 dark:text-white"
                   } rounded px-3 py-2 md:p-0`}
+                  id="navbar-team"
                 >
                   Team
                 </Link>

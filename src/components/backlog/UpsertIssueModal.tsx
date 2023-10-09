@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/router";
-import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { type Issue, type User } from "@prisma/client";
 import Modal from "../common/Modal";
@@ -11,6 +10,7 @@ import {
   issueFormSchema,
   type IssueFormSchema,
 } from "~/utils/types";
+import { useTour } from "@reactour/tour";
 
 export default function UpsertIssueModal({
   onClose,
@@ -25,8 +25,8 @@ export default function UpsertIssueModal({
   backlog?: string;
   teamUsers: User[];
 }) {
-  const { data: session } = useSession();
   const router = useRouter();
+  const { setCurrentStep } = useTour();
   const createMutation = api.issue.create.useMutation();
   const updateMutation = api.issue.update.useMutation();
 
@@ -36,38 +36,40 @@ export default function UpsertIssueModal({
       summary: issue?.summary ?? "",
       status: issue?.status ?? "toDo",
       backlog: issue?.backlog ?? backlog,
-      assignee: issue?.userId ?? "",
+      userId: issue?.userId ?? "",
       type: issue?.type ?? "task",
-      estimate: issue?.estimate?.toString() ?? "0",
+      estimate: issue?.estimate ?? "0",
     },
   });
 
-  const onSubmit = async (data: IssueFormSchema) => {
-    if (!issue && teamId) {
-      createMutation.mutate({
-        teamId,
-        status: data.status,
-        summary: data.summary,
-        backlog: data.backlog,
-      });
-    } else if (issue?.id && teamId) {
-      updateMutation.mutate({
-        id: issue.id,
-        status: data.status,
-        summary: data.summary,
-        backlog: data.backlog,
-        teamId,
-      });
-    }
+  const endSubmit = async () => {
     onClose();
+    setCurrentStep(10);
     await router.replace(router.asPath);
   };
+
+  const onSubmit = (data: IssueFormSchema) => {
+    if (!issue && teamId) {
+      createMutation.mutate({ ...data, teamId }, { onSuccess: endSubmit });
+    } else if (issue?.id && teamId) {
+      updateMutation.mutate(
+        { ...data, id: issue.id, teamId },
+        { onSuccess: endSubmit },
+      );
+    }
+  };
+
+  useEffect(() => {
+    setCurrentStep(9);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Modal title={issue ? "Edit Issue" : "Create Issue"} onClose={onClose}>
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-4 p-4"
+        id="upsert-issue-form"
       >
         <div className="flex flex-col gap-2">
           <div className="flex justify-between gap-2">
@@ -93,27 +95,25 @@ export default function UpsertIssueModal({
               </select>
             </div>
           )}
-          {session?.user.role === "productOwner" && (
-            <div className="flex justify-between gap-2">
-              <label className="font-bold dark:text-white">Backlog</label>
-              <select
-                id="backlog"
-                data-testid="backlog"
-                className="w-3/4 rounded-md border border-gray-900"
-                {...register("backlog")}
-              >
-                <option value="sprint">Sprint Backlog</option>
-                <option value="product">Product Backlog</option>
-              </select>
-            </div>
-          )}
+          <div className="flex justify-between gap-2">
+            <label className="font-bold dark:text-white">Backlog</label>
+            <select
+              id="backlog"
+              data-testid="backlog"
+              className="w-3/4 rounded-md border border-gray-900"
+              {...register("backlog")}
+            >
+              <option value="sprint">Sprint Backlog</option>
+              <option value="product">Product Backlog</option>
+            </select>
+          </div>
           <div className="flex justify-between gap-2">
             <label className="font-bold dark:text-white">Assignee</label>
             <select
-              id="assignee"
-              data-testid="assignee"
+              id="userId"
+              data-testid="userId"
               className="w-3/4 rounded-md border border-gray-900"
-              {...register("assignee")}
+              {...register("userId")}
             >
               <option value="">Unassigned</option>
               {teamUsers.map((user) => (

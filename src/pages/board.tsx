@@ -1,25 +1,20 @@
-import React, { useState } from "react";
+import React from "react";
 import { type GetServerSidePropsContext } from "next";
 import { getSession, useSession } from "next-auth/react";
 import type { Issue, Team } from "@prisma/client";
 import IssueContainer from "~/components/board/IssueContainer";
-import {
-  DndContext,
-  type DragEndEvent,
-  type DragOverEvent,
-} from "@dnd-kit/core";
+import { DndContext, type DragEndEvent } from "@dnd-kit/core";
 import { columns } from "~/utils/constants";
 import { prisma } from "~/server/db";
 import { api } from "~/utils/api";
 
 export default function ScrumBoard({
-  backendIssues,
+  issues,
   team,
 }: {
-  backendIssues: Issue[];
+  issues: Issue[];
   team: Team;
 }) {
-  const [issues, setIssues] = useState(backendIssues);
   const updateMutation = api.issue.update.useMutation();
   const { data: session } = useSession();
 
@@ -33,28 +28,13 @@ export default function ScrumBoard({
     const { active, over } = event;
     if (!over) return;
 
-    const issuesDupe = [...issues];
-    const activeIssue = issuesDupe.find(
+    const activeIssue = issues.find(
       (issue) => issue.id === active.id.toString(),
     );
+
     if (activeIssue) {
       activeIssue.status = over.id.toString();
-      setIssues(issuesDupe);
       updateIssue(active.id.toString(), over.id.toString());
-    }
-  }
-
-  function onDragOver(event: DragOverEvent) {
-    const { active, over } = event;
-    if (!over) return;
-
-    const issuesDupe = [...issues];
-    const activeIssue = issuesDupe.find(
-      (issue) => issue.id === active.id.toString(),
-    );
-    if (activeIssue) {
-      activeIssue.status = over.id.toString();
-      setIssues(issuesDupe);
     }
   }
 
@@ -66,8 +46,8 @@ export default function ScrumBoard({
           {team.projectName}
         </h2>
       </div>
-      <DndContext onDragEnd={onDragEnd} onDragOver={onDragOver}>
-        <div className="flex flex-col gap-4 px-4 md:flex-row">
+      <DndContext onDragEnd={onDragEnd}>
+        <div className="flex flex-col gap-4 p-4 md:flex-row">
           {columns.map((col) => (
             <IssueContainer
               key={col.id}
@@ -124,6 +104,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   });
 
   return {
-    props: { backendIssues: issues, team },
+    props: { issues, team },
   };
 }

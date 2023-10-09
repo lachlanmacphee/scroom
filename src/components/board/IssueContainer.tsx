@@ -19,14 +19,18 @@ const IssueContainer = ({
   });
 
   return (
-    <div ref={setNodeRef} className="flex flex-col items-center gap-4 md:w-1/3">
+    <div
+      ref={setNodeRef}
+      id={`board-${containerId}`}
+      className="flex flex-col items-center gap-4 md:w-1/3"
+    >
       <h2 className="mb-2 text-left text-lg font-semibold dark:text-white">
         {containerTitle} ({issues.length})
       </h2>
 
       <div
         id="dropContainer"
-        className="flex  w-full max-w-sm flex-col gap-3 rounded-lg bg-white p-6 shadow dark:bg-gray-800 dark:text-white"
+        className="flex min-h-full w-full max-w-sm flex-col gap-3 rounded-lg bg-white p-6 shadow dark:bg-gray-800 dark:text-white"
       >
         {issues.map((issue) => (
           <IssueItem key={issue.id} issue={issue} />

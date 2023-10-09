@@ -7,9 +7,15 @@ export default function DeleteIssueButton({ issue }: { issue: Issue }) {
   const router = useRouter();
   const deleteMutation = api.issue.delete.useMutation();
 
-  const deleteHandler = async () => {
-    deleteMutation.mutate({ id: issue.id });
-    await router.replace(router.asPath);
+  const deleteHandler = () => {
+    deleteMutation.mutate(
+      { id: issue.id },
+      {
+        onSuccess: async () => {
+          await router.replace(router.asPath);
+        },
+      },
+    );
   };
 
   return (
