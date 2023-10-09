@@ -7,7 +7,7 @@ export default function IssueStoryPoints({ issue }: { issue: Issue }) {
       data-testid="IssueStoryPoints"
       className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-300 text-black"
     >
-      <span>{issue.estimate}</span>
+      <span>{issue.estimate ?? "-"}</span>
     </div>
   );
 }

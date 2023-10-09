@@ -21,6 +21,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { api } from "~/utils/api";
+import { type UpdateIssueInputs } from "~/utils/types";
 
 export default function Backlog({
   dataIssues,
@@ -52,25 +53,14 @@ export default function Backlog({
     }),
   );
 
-  const updateIssue = ({
-    id,
-    summary,
-    status,
-    backlog,
-  }: {
-    id: string;
-    summary?: string;
-    status?: string;
-    backlog?: string;
-  }) => {
+  const updateIssue = (data: UpdateIssueInputs) => {
     const teamId = session?.user.teamId;
     if (!teamId) return;
-    const body = { id, summary, status, backlog, teamId };
-    updateMutation.mutate(body);
+    updateMutation.mutate({ ...data, teamId });
   };
 
   return (
-    <div className="flex flex-grow flex-col bg-white px-12 dark:bg-slate-700">
+    <div className="flex flex-grow flex-col bg-white px-12 pb-12 dark:bg-slate-700">
       <div className="flex pb-4 pt-8">
         <h1 className="flex-auto text-center text-3xl font-bold dark:text-white">
           {team.projectName}

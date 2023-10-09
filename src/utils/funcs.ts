@@ -17,10 +17,16 @@ export function calculatePoints(users: User[], issues: Issue[]) {
     const userIssues = issues.filter((issue) => issue.userId === user.id);
     const doneIssues = userIssues.filter((issue) => issue.status == "done");
     const donePoints = doneIssues
-      .reduce((accumulator, issue) => accumulator + (issue.estimate ?? 0), 0)
+      .reduce(
+        (accumulator, issue) => accumulator + (Number(issue.estimate) ?? 0),
+        0,
+      )
       .toString();
     const totalPoints = userIssues
-      .reduce((accumulator, issue) => accumulator + (issue.estimate ?? 0), 0)
+      .reduce(
+        (accumulator, issue) => accumulator + (Number(issue.estimate) ?? 0),
+        0,
+      )
       .toString();
     pointsDict[user.id] = { donePoints, totalPoints };
   });

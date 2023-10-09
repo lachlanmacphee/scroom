@@ -77,10 +77,10 @@ model Issue {
     backlog  String
     summary  String
     teamId   String
-    estimate Int?
+    estimate String?
     type     String?
     userId   String?
-    assignee User?   @relation(fields: [userId], references: [id])
+    user User?   @relation(fields: [userId], references: [id])
     team     Team    @relation(fields: [teamId], references: [id])
 
     @@index([teamId])
