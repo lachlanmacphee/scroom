@@ -2,12 +2,13 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
+
 datasource db {
-  provider = "mysql"
-  url = env("DATABASE_URL")
-  relationMode = "prisma"
+    provider     = "mysql"
+    url          = env("DATABASE_URL")
+    relationMode = "prisma"
 }
 
 model Account {
@@ -40,17 +41,19 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(cuid())
+    id            String       @id @default(cuid())
     name          String?
     teamId        String?
-    team          Team?     @relation(fields: [teamId], references: [id])
+    team          Team?        @relation(fields: [teamId], references: [id])
     role          String?
-    email         String?   @unique
+    email         String?      @unique
     emailVerified DateTime?
     image         String?
     accounts      Account[]
     sessions      Session[]
     issues        Issue[]
+    dailyScrums   DailyScrum[]
+    issueComments IssueComment[]
 
     @@index([teamId])
 }
@@ -64,11 +67,15 @@ model VerificationToken {
 }
 
 model Team {
-    id          String  @id @default(cuid())
+    id          String       @id @default(cuid())
     name        String
     projectName String
     users       User[]
     issues      Issue[]
+    sprints     Sprint[]
+    dailyScrums  DailyScrum[]
+    statuses      Status[]
+
 }
 
 model Issue {
@@ -77,12 +84,68 @@ model Issue {
     backlog  String
     summary  String
     teamId   String
+    sprintId String?
     estimate String?
     type     String?
+    tag      String?
     userId   String?
-    user User?   @relation(fields: [userId], references: [id])
+    description     String?
+    user     User?   @relation(fields: [userId], references: [id])
     team     Team    @relation(fields: [teamId], references: [id])
+    sprint   Sprint? @relation(fields: [sprintId], references: [id])
+    issueComments      IssueComment[]
 
     @@index([teamId])
     @@index([userId])
+    @@index([sprintId])
+}
+
+model Sprint {
+    id        String   @id @default(cuid())
+    name      String
+    startDate DateTime
+    endDate   DateTime
+    issues    Issue[]
+    teamId    String
+    team      Team     @relation(fields: [teamId], references: [id])
+
+    @@index([teamId])
+}
+
+model Status {
+    id    String @id @default(cuid())
+    value String
+    title String
+    teamId    String
+    team      Team     @relation(fields: [teamId], references: [id])
+
+    @@index([teamId])
+}
+
+model DailyScrum {
+    id         String   @id @default(cuid())
+    yesterday  String
+    today      String
+    blockers   String
+    datePosted DateTime
+    userId     String
+    teamId     String
+    user       User     @relation(fields: [userId], references: [id])
+    team       Team     @relation(fields: [teamId], references: [id])
+
+    @@index([teamId])
+    @@index([userId])
+}
+
+model IssueComment {
+    id              String @id @default(cuid())
+    userId          String
+    dateCreated     DateTime
+    content         String
+    issueId         String
+    user            User     @relation(fields: [userId], references: [id])
+    issue           Issue    @relation(fields: [issueId], references: [id])
+
+    @@index([userId])
+    @@index([issueId])
 }
