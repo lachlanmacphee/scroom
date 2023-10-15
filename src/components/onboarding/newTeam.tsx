@@ -1,9 +1,6 @@
 import { useState } from "react";
 
-type handleNewTeamSubmit = (
-  teamName: string,
-  projectName: string,
-) => Promise<void>;
+type handleNewTeamSubmit = (teamName: string, projectName: string) => void;
 
 export default function NewTeam({
   handleNewTeamSubmit,
