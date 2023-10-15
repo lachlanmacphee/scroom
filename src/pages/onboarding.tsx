@@ -18,22 +18,29 @@ export default function Onboarding() {
     teamId = teamId[0];
   }
 
-  const handleNewTeamSubmit = async (teamName: string, projectName: string) => {
-    if (!userId) {
-      return;
-    }
-    createMutation.mutate({ name: teamName, projectName, userId });
-    await router.push("/");
+  const updateAndRedirect = async () => {
     await update();
+    await router.push("/");
   };
 
-  const handleJoinTeamSubmit = async (teamCode: string) => {
+  const handleNewTeamSubmit = (teamName: string, projectName: string) => {
     if (!userId) {
       return;
     }
-    joinMutation.mutate({ teamId: teamCode, userId, role: "guest" });
-    await router.push("/");
-    await update();
+    createMutation.mutate(
+      { name: teamName, projectName, userId },
+      { onSuccess: updateAndRedirect },
+    );
+  };
+
+  const handleJoinTeamSubmit = (teamCode: string) => {
+    if (!userId) {
+      return;
+    }
+    joinMutation.mutate(
+      { teamId: teamCode, userId, role: "guest" },
+      { onSuccess: updateAndRedirect },
+    );
   };
 
   return (

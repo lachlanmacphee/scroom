@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-type handleJoinTeamSubmit = (teamCode: string) => Promise<void>;
+type handleJoinTeamSubmit = (teamCode: string) => void;
 
 export default function JoinTeam({
   handleJoinTeamSubmit,
