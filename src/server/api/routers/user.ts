@@ -1,15 +1,10 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
 
 export const userRouter = createTRPCRouter({
-  // Only admins can change roles
-  // if (role && session?.user.role !== "admin") {
-  //   return res
-  //     .status(401)
-  //     .json({ error: "Only admins can change user roles." });
-  // }
   update: protectedProcedure
     .input(
       z.object({
@@ -17,7 +12,13 @@ export const userRouter = createTRPCRouter({
         role: z.string().optional(),
       }),
     )
-    .mutation(async ({ input: { id, role } }) => {
+    .mutation(async ({ input: { id, role }, ctx }) => {
+      if (ctx.session?.user.role !== "admin") {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Only admins can update roles.",
+        });
+      }
       const user = await prisma.user.update({ data: { role }, where: { id } });
       return user;
     }),

@@ -28,3 +28,5 @@ const product_backlog: backlogContainer = {
 };
 
 export const containers = [sprint_backlog, product_backlog];
+
+export const oneDayInMs = 1000 * 60 * 60 * 24;
