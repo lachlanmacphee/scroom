@@ -4,6 +4,7 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
 import { createTransport } from "nodemailer";
 import { env } from "~/env.mjs";
+import { TRPCError } from "@trpc/server";
 
 export const teamRouter = createTRPCRouter({
   create: protectedProcedure
@@ -25,12 +26,6 @@ export const teamRouter = createTRPCRouter({
       return { team, user };
     }),
 
-  // Only admins can update the team and project
-  // if (session?.user.role !== "admin") {
-  //   return res
-  //     .status(401)
-  //     .json({ error: "Only admins can update the team and project." });
-  // }
   update: protectedProcedure
     .input(
       z.object({
@@ -39,7 +34,13 @@ export const teamRouter = createTRPCRouter({
         projectName: z.string(),
       }),
     )
-    .mutation(async ({ input: { name, projectName, id } }) => {
+    .mutation(async ({ input: { name, projectName, id }, ctx }) => {
+      if (ctx.session?.user.role !== "admin") {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Only admins can update the team and project.",
+        });
+      }
       const team = await prisma.team.update({
         data: { name, projectName },
         where: { id },
@@ -48,13 +49,15 @@ export const teamRouter = createTRPCRouter({
       return team;
     }),
 
-  // Only admins can reset a team
-  // if (session?.user.role !== "admin") {
-  //   return res.status(401).json({ error: "Only admins can reset a team." });
-  // }
   reset: protectedProcedure
     .input(z.object({ teamId: z.string() }))
-    .mutation(async ({ input: { teamId } }) => {
+    .mutation(async ({ input: { teamId }, ctx }) => {
+      if (ctx.session?.user.role !== "admin") {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Only admins can reset a team.",
+        });
+      }
       const issues = await prisma.issue.deleteMany({ where: { teamId } });
       const users = await prisma.user.updateMany({
         where: { teamId, role: { not: { equals: "admin" } } },
@@ -64,7 +67,6 @@ export const teamRouter = createTRPCRouter({
       return { users, issues };
     }),
 
-  // Only admin can remove from team
   remove: protectedProcedure
     .input(
       z.object({
@@ -91,10 +93,9 @@ export const teamRouter = createTRPCRouter({
         toEmail: z.string(),
         teamName: z.string(),
         teamId: z.string(),
-        windowUrl: z.string(),
       }),
     )
-    .mutation(async ({ input: { toEmail, teamName, teamId, windowUrl } }) => {
+    .mutation(async ({ input: { toEmail, teamName, teamId } }) => {
       const transporter = createTransport({
         pool: true,
         host: env.EMAIL_SERVER_HOST,
@@ -110,12 +111,7 @@ export const teamRouter = createTRPCRouter({
         from: env.EMAIL_FROM,
         to: toEmail,
         subject: "Team Invite",
-        text:
-          "You have been invited to join " +
-          teamName +
-          " on scroom!" +
-          "Once you've signed up, click this link: " +
-          `http://${windowUrl}/onboarding?teamId=${teamId}`,
+        text: `You have been invited to join ${teamName} on scroom! Once you've signed up, click this link https://scroom-xi/onboarding?teamId=${teamId}`,
       };
 
       const info = await transporter.sendMail(mailOptions);

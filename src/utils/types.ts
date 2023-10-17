@@ -44,3 +44,24 @@ export const teamDetailsFormSchema = z.object({
 });
 
 export type TeamDetailsFormSchema = z.infer<typeof teamDetailsFormSchema>;
+
+export type ActualGraphDataType = {
+  day: number;
+  actual: number;
+};
+
+export type ExpectedGraphDataType = {
+  day: number;
+  expected: number;
+};
+
+export type ContributionDataType = {
+  name: string;
+  completed: number;
+  remaining: number;
+};
+
+export type BurndownGraphDataOutput = {
+  actualBurndownData: ActualGraphDataType[];
+  expectedBurndownData: ExpectedGraphDataType[];
+};

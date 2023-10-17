@@ -23,8 +23,6 @@ export default function InviteMemberButton({ team }: { team: Team }) {
       teamId: team.id,
       toEmail: data.toEmail,
       teamName: team.name,
-      // Replace this next line with code to get the domain (eg scroom-xi.vercel.app or localhost:3000)
-      windowUrl: "localhost:3000",
     });
     setIsInviteTeamMemberModalOpen(false);
     await router.replace(router.asPath);

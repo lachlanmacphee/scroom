@@ -90,7 +90,8 @@ model Issue {
     tag      String?
     userId   String?
     description     String?
-    user     User?   @relation(fields: [userId], references: [id])
+    dateCompleted DateTime?
+    user User?   @relation(fields: [userId], references: [id])
     team     Team    @relation(fields: [teamId], references: [id])
     sprint   Sprint? @relation(fields: [sprintId], references: [id])
     issueComments      IssueComment[]

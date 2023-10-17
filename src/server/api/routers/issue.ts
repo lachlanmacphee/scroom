@@ -18,7 +18,11 @@ export const issueRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       const issue = await prisma.issue.create({
-        data: input,
+        data: {
+          ...input,
+          dateCompleted:
+            input.status === "done" ? new Date().toISOString() : null,
+        },
       });
       return issue;
     }),
@@ -38,7 +42,11 @@ export const issueRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       const issue = await prisma.issue.update({
-        data: input,
+        data: {
+          ...input,
+          dateCompleted:
+            input.status === "done" ? new Date().toISOString() : null,
+        },
         where: { id: input.id, teamId: input.teamId },
       });
       return issue;

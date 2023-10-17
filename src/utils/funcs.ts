@@ -1,5 +1,12 @@
-import type { User, Issue } from "@prisma/client";
-import type { PointsDict } from "~/utils/types";
+import type { User, Issue, Sprint } from "@prisma/client";
+import type {
+  ActualGraphDataType,
+  BurndownGraphDataOutput,
+  ContributionDataType,
+  ExpectedGraphDataType,
+  PointsDict,
+} from "~/utils/types";
+import { oneDayInMs } from "./constants";
 
 export function convertRole(role: string) {
   if (role === "productOwner") return "Product Owner";
@@ -55,4 +62,124 @@ export function sortUsers({
     }
     return 0;
   });
+}
+
+export function convertToBurndownData(
+  issues: Issue[],
+  sprints: Sprint[],
+  inputCurrentTime?: number,
+): BurndownGraphDataOutput {
+  const defaultBurndownReturn = {
+    actualBurndownData: [],
+    expectedBurndownData: [],
+  };
+
+  const completedIssues = issues.filter((issue) => issue.status === "done");
+  // Finds the current sprint by determining if today's date is within the range
+  // of an existing sprint
+  const currentTime = inputCurrentTime ?? Date.now();
+  const currentSprint = sprints.find(
+    (sprint) =>
+      sprint.startDate.getTime() <= currentTime &&
+      currentTime <= sprint.endDate.getTime(),
+  );
+
+  // If no sprint was found, return an empty array of graph data
+  if (!currentSprint) return defaultBurndownReturn;
+
+  const sprintStartDate = currentSprint.startDate.getTime();
+  const sprintEndDate = currentSprint.endDate.getTime();
+  const daysInSprint = Math.abs(sprintEndDate - sprintStartDate) / oneDayInMs;
+
+  const issueCompletionTimes = issues.map((issue) =>
+    issue.dateCompleted ? issue.dateCompleted.getTime() : 0,
+  );
+
+  if (
+    issueCompletionTimes.filter(
+      (issueCompletionTime) => issueCompletionTime !== 0,
+    ).length === 0
+  )
+    return defaultBurndownReturn;
+
+  const daysIntoSprint =
+    Math.abs(Math.max(...issueCompletionTimes) + oneDayInMs - sprintStartDate) /
+    oneDayInMs;
+
+  if (daysIntoSprint === Infinity) return defaultBurndownReturn;
+
+  const pointsCompletedEachDay: Record<number, number> = {};
+  completedIssues.forEach((issue) => {
+    const dateCompleted = issue.dateCompleted?.getTime();
+    if (!dateCompleted) return;
+    const timeDifference = Math.abs(dateCompleted - sprintStartDate);
+    const daysSinceSprintStart = Math.ceil(timeDifference / oneDayInMs);
+    const numEstimate = Number(issue.estimate);
+    const currentVal = pointsCompletedEachDay[daysSinceSprintStart];
+
+    if (currentVal) {
+      pointsCompletedEachDay[daysSinceSprintStart] = currentVal + numEstimate;
+      return;
+    }
+    pointsCompletedEachDay[daysSinceSprintStart] = numEstimate;
+  });
+
+  // Now we have an object representing how many story points were completed on each day since the start
+
+  const actualBurndownData: ActualGraphDataType[] = [];
+
+  const totalPoints = issues.reduce(
+    (accumulator, issue) => accumulator + Number(issue.estimate),
+    0,
+  );
+
+  actualBurndownData.push({ day: 0, actual: totalPoints });
+
+  for (let i = 1; i < daysIntoSprint; i++) {
+    const pointsToRemove = pointsCompletedEachDay[i]
+      ? pointsCompletedEachDay[i]
+      : 0;
+    actualBurndownData.push({
+      day: i,
+      actual: actualBurndownData[i - 1].actual - pointsToRemove,
+    });
+  }
+
+  const expectedBurndownData: ExpectedGraphDataType[] = [
+    { day: 0, expected: totalPoints },
+    { day: daysInSprint, expected: 0 },
+  ];
+
+  return { actualBurndownData, expectedBurndownData };
+}
+
+export function convertToContributionData(
+  issues: Issue[],
+  users: User[],
+): ContributionDataType[] {
+  const assigneeData: Record<string, ContributionDataType> = {};
+  if (issues.length === 0) return [];
+
+  issues.forEach((issue) => {
+    const { estimate, status, userId } = issue;
+    const numEstimate = Number(estimate);
+    const assignee = users.find((user) => user.id === userId);
+
+    if (!userId || !assignee) return;
+    if (assigneeData[userId]) {
+      if (status === "done") {
+        assigneeData[userId].completed += numEstimate;
+      } else {
+        assigneeData[userId].remaining += numEstimate;
+      }
+    } else {
+      assigneeData[userId] = {
+        name: assignee.name ?? "",
+        completed: status === "done" ? numEstimate : 0,
+        remaining: status === "done" ? 0 : numEstimate,
+      };
+    }
+  });
+
+  return Object.values(assigneeData);
 }
