@@ -7,7 +7,6 @@ import clsx from "clsx";
 import SummaryItem from "./SummaryItem";
 import StatusDropdown from "./StatusDropdown";
 import EditIssueButton from "./EditIssueButton";
-import { useSession } from "next-auth/react";
 import DeleteIssueButton from "./DeleteIssueButton";
 import { type UpdateIssue } from "~/utils/types";
 
@@ -21,7 +20,6 @@ export function IssueItem({
   updateIssue: UpdateIssue;
 }) {
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
-  const { data: session } = useSession();
 
   const {
     attributes,
@@ -69,7 +67,6 @@ export function IssueItem({
           onClose={() => setIsIssueModalOpen(false)}
           issue={issue}
           teamUsers={teamUsers}
-          teamId={session?.user.teamId}
         />
       )}
     </div>
