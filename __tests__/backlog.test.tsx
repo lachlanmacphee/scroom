@@ -34,7 +34,6 @@ describe("addIssueModal", () => {
       <UpsertIssueModal
         onClose={() => {}}
         backlog={issue.backlog}
-        teamId={team.id}
         teamUsers={teamUsers}
       />,
     );
@@ -46,7 +45,6 @@ describe("addIssueModal", () => {
       <UpsertIssueModal
         onClose={() => {}}
         backlog={issue.backlog}
-        teamId={team.id}
         teamUsers={teamUsers}
       />,
     );
@@ -58,7 +56,6 @@ describe("addIssueModal", () => {
       <UpsertIssueModal
         onClose={() => {}}
         backlog={issue.backlog}
-        teamId={team.id}
         teamUsers={teamUsers}
       />,
     );
@@ -70,7 +67,6 @@ describe("addIssueModal", () => {
       <UpsertIssueModal
         onClose={() => {}}
         backlog={issue.backlog}
-        teamId={team.id}
         teamUsers={teamUsers}
       />,
     );
@@ -82,7 +78,6 @@ describe("addIssueModal", () => {
       <UpsertIssueModal
         onClose={() => {}}
         backlog={issue.backlog}
-        teamId={team.id}
         teamUsers={teamUsers}
       />,
     );
@@ -94,7 +89,6 @@ describe("addIssueModal", () => {
       <UpsertIssueModal
         onClose={() => {}}
         backlog={issue.backlog}
-        teamId={team.id}
         teamUsers={teamUsers}
       />,
     );

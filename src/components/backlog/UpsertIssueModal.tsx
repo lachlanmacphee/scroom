@@ -11,22 +11,23 @@ import {
   type IssueFormSchema,
 } from "~/utils/types";
 import { useTour } from "@reactour/tour";
+import { useSession } from "next-auth/react";
 
 export default function UpsertIssueModal({
   onClose,
   issue,
-  teamId,
   backlog,
   teamUsers,
 }: {
   onClose: onClose;
   issue?: Issue;
-  teamId?: string;
   backlog?: string;
   teamUsers: User[];
 }) {
   const router = useRouter();
-  const { setCurrentStep } = useTour();
+  const { setCurrentStep, isOpen } = useTour();
+  const { data: session } = useSession();
+  const teamId = session?.user.teamId;
   const createMutation = api.issue.create.useMutation();
   const updateMutation = api.issue.update.useMutation();
 
@@ -44,7 +45,7 @@ export default function UpsertIssueModal({
 
   const endSubmit = async () => {
     onClose();
-    setCurrentStep(10);
+    isOpen && setCurrentStep(10);
     await router.replace(router.asPath);
   };
 
@@ -60,7 +61,7 @@ export default function UpsertIssueModal({
   };
 
   useEffect(() => {
-    setCurrentStep(9);
+    isOpen && setCurrentStep(9);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -142,7 +143,8 @@ export default function UpsertIssueModal({
               type="number"
               data-testid="estimate"
               className="w-3/4 rounded-md border border-gray-900 pl-1"
-              {...register("estimate", { min: "0" })}
+              min={0}
+              {...register("estimate")}
             />
           </div>
         </div>

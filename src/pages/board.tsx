@@ -1,9 +1,15 @@
 import React from "react";
 import { type GetServerSidePropsContext } from "next";
 import { getSession, useSession } from "next-auth/react";
-import type { Issue, Team } from "@prisma/client";
+import type { Issue, Team, User } from "@prisma/client";
 import IssueContainer from "~/components/board/IssueContainer";
-import { DndContext, type DragEndEvent } from "@dnd-kit/core";
+import {
+  DndContext,
+  type DragEndEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 import { columns } from "~/utils/constants";
 import { prisma } from "~/server/db";
 import { api } from "~/utils/api";
@@ -11,9 +17,11 @@ import { api } from "~/utils/api";
 export default function ScrumBoard({
   issues,
   team,
+  teamUsers,
 }: {
   issues: Issue[];
   team: Team;
+  teamUsers: User[];
 }) {
   const updateMutation = api.issue.update.useMutation();
   const { data: session } = useSession();
@@ -33,10 +41,21 @@ export default function ScrumBoard({
     );
 
     if (activeIssue) {
+      if (activeIssue.status == over.id.toString()) return;
       activeIssue.status = over.id.toString();
       updateIssue(active.id.toString(), over.id.toString());
     }
   }
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      // Enables modal to be opened if just clicking
+      // Drag wont start working until issue moved 10 px
+      activationConstraint: {
+        distance: 10,
+      },
+    }),
+  );
 
   return (
     <div className="flex flex-grow flex-col bg-white dark:bg-slate-700">
@@ -46,7 +65,7 @@ export default function ScrumBoard({
           {team.projectName}
         </h2>
       </div>
-      <DndContext onDragEnd={onDragEnd}>
+      <DndContext onDragEnd={onDragEnd} sensors={sensors}>
         <div className="flex flex-col gap-4 p-4 md:flex-row">
           {columns.map((col) => (
             <IssueContainer
@@ -54,6 +73,7 @@ export default function ScrumBoard({
               containerId={col.id}
               containerTitle={col.title}
               issues={issues.filter((issue) => issue.status === col.id)}
+              teamUsers={teamUsers}
             />
           ))}
         </div>
@@ -80,10 +100,13 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const issues = await prisma.issue.findMany({
     select: {
       id: true,
-      summary: true,
       status: true,
-      estimate: true,
       backlog: true,
+      summary: true,
+      teamId: true,
+      estimate: true,
+      type: true,
+      userId: true,
     },
     where: {
       backlog: "sprint",
@@ -103,7 +126,19 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     },
   });
 
+  const teamUsers = await prisma.user.findMany({
+    select: {
+      id: true,
+      name: true,
+      teamId: true,
+      role: true,
+    },
+    where: {
+      teamId: session.user?.teamId,
+    },
+  });
+
   return {
-    props: { issues, team },
+    props: { issues, team, teamUsers },
   };
 }
