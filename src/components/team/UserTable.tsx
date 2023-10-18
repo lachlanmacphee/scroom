@@ -50,6 +50,7 @@ export default function UserTable({
           <UserRow
             key={user.id}
             user={user}
+            users={users}
             handleRoleChange={handleRoleChange}
             role={role}
             userPoints={pointsDict[user.id]}
