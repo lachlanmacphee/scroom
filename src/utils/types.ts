@@ -33,13 +33,11 @@ export const issuePartialSchema = z.object({
 
 export type IssuePartialSchema = z.infer<typeof issuePartialSchema>;
 
-
 export const statusSchema = z.object({
   title: z.string(),
 });
 
 export type StatusSchema = z.infer<typeof statusSchema>;
-
 
 export type UpdateIssueInputs = {
   id: string;
@@ -59,6 +57,13 @@ export type AddNewStatusInputs = {
 };
 
 export type AddNewStatus = (data: AddNewStatusInputs) => void;
+export const dailyScrumFormSchema = z.object({
+  yesterday: z.string(),
+  today: z.string(),
+  blockers: z.string(),
+});
+
+export type DailyScrumFormSchema = z.infer<typeof dailyScrumFormSchema>;
 
 export const inviteMemberSchema = z.object({
   toEmail: z.string(),

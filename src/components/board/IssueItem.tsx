@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { Issue, User } from "@prisma/client";
+import type { Issue, Status, User } from "@prisma/client";
 import { CSS } from "@dnd-kit/utilities";
 import { useDraggable } from "@dnd-kit/core";
 import IssueStoryPoints from "./IssueStoryPoints";
@@ -8,8 +8,9 @@ import UpsertIssueModal from "../backlog/UpsertIssueModal";
 interface IssueProps {
   issue: Issue;
   teamUsers: User[];
+  statuses: Status[];
 }
-export default function IssueItem({ issue, teamUsers }: IssueProps) {
+export default function IssueItem({ issue, teamUsers, statuses }: IssueProps) {
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: issue.id,
@@ -27,6 +28,7 @@ export default function IssueItem({ issue, teamUsers }: IssueProps) {
           teamUsers={teamUsers}
           issue={issue}
           backlog="sprint"
+          statuses={statuses}
         />
       )}
       <div

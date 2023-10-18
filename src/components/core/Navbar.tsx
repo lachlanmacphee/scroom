@@ -98,6 +98,17 @@ export default function Navbar() {
                 >
                   Charts
                 </Link>
+                <Link
+                  href="/dailyScrum"
+                  className={`block ${
+                    router.route === "/dailyScrum"
+                      ? "text-blue-500"
+                      : "text-gray-900 dark:text-white"
+                  } rounded px-3 py-2 md:p-0`}
+                  id="navbar-dailyScrum"
+                >
+                  Daily Scrum
+                </Link>
               </li>
               <li>
                 <Link
