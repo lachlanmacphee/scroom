@@ -136,7 +136,7 @@ export const teamRouter = createTRPCRouter({
         from: env.EMAIL_FROM,
         to: toEmail,
         subject: "Team Invite",
-        text: `You have been invited to join ${teamName} on scroom! Once you've signed up, click this link https://scroom-xi/onboarding?teamId=${teamId}`,
+        text: `You have been invited to join ${teamName} on scroom! Once you've signed up, click this link https://scroom-xi.vercel.app/onboarding?teamId=${teamId}`,
       };
 
       const info = await transporter.sendMail(mailOptions);
