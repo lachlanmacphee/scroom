@@ -1,7 +1,7 @@
+/* eslint-disable @next/next/no-img-element */
 import React from "react";
 import type { User } from "@prisma/client";
 import type { Points } from "~/utils/types";
-import Image from "next/image";
 import RemoveMemberButton from "~/components/team/RemoveMemberButton";
 import MemberStoryPoints from "~/components/team/MemberStoryPoints";
 
@@ -29,7 +29,7 @@ export default function UserRow({
   return (
     <div className="flex flex-col items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white p-3 shadow dark:border-gray-700 dark:bg-gray-800 md:flex-row md:gap-0">
       <div className="flex items-center gap-4">
-        <Image
+        <img
           className="rounded-full"
           src={
             user.image ??

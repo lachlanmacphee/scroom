@@ -1,5 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
 import { signOut, useSession } from "next-auth/react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { TbLogout2 } from "react-icons/tb";
@@ -23,7 +23,7 @@ export default function Navbar() {
               {convertRole(session.user.role)}
             </p>
           )}
-          <Image
+          <img
             alt="avatar"
             src={
               session?.user.image ??
@@ -110,6 +110,19 @@ export default function Navbar() {
                   id="navbar-team"
                 >
                   Team
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/profile"
+                  className={`block ${
+                    router.route === "/profile"
+                      ? "text-blue-500"
+                      : "text-gray-900 dark:text-white"
+                  } rounded px-3 py-2 md:p-0`}
+                  id="navbar-profile"
+                >
+                  Profile
                 </Link>
               </li>
             </ul>
