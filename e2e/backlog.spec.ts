@@ -12,3 +12,5 @@ test("new issue can be added", async ({ page }) => {
   await page.getByText("Save").click();
   await expect(page.getByText("a summary")).toBeVisible();
 });
+
+

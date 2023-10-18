@@ -14,6 +14,7 @@ export const issueRouter = createTRPCRouter({
         type: z.string(),
         estimate: z.string(),
         teamId: z.string(),
+        sprintId: z.string().nullable().optional(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -38,6 +39,7 @@ export const issueRouter = createTRPCRouter({
         type: z.string().optional(),
         estimate: z.string().optional(),
         teamId: z.string(),
+        sprintId: z.string().nullable().optional(),
       }),
     )
     .mutation(async ({ input }) => {
