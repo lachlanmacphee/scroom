@@ -8,6 +8,7 @@ export type Points = {
 export type PointsDict = Record<string, Points>;
 
 export type onClose = () => void;
+export type voidReturnFunc = () => void;
 
 export const issueFormSchema = z.object({
   summary: z.string(),

@@ -117,4 +117,17 @@ export const teamRouter = createTRPCRouter({
       const info = await transporter.sendMail(mailOptions);
       return info;
     }),
+
+  delete: protectedProcedure
+    .input(z.object({ teamId: z.string() }))
+    .mutation(async ({ input: { teamId } }) => {
+      const issues = await prisma.issue.deleteMany({ where: { teamId } });
+      // delete all comments, sprints, status and daily scrums
+      const users = await prisma.user.updateMany({
+        where: { teamId },
+        data: { teamId: null, role: null },
+      });
+      const team = await prisma.team.delete({ where: { id: teamId } });
+      return { users, issues, team };
+    }),
 });

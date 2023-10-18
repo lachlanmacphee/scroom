@@ -58,3 +58,14 @@ test("Invite user to team", async ({ page }) => {
   await page.getByText("Send").click();
   await expect(page.getByTestId("inviteMemberModal")).not.toBeVisible();
 });
+
+// better test for admin leaving team, tried other things but couldn't get to work so went with this
+test('Admin leaving team goes to home page', async ({ page }) => {
+  await page.goto('/team');
+  await page.getByTestId('leaveTeamButton').click();
+  await page.getByTestId('confirmationField').click();
+  await page.getByTestId('confirmationField').fill('confirm');
+  await page.getByTestId("confirmButton").click();
+  // don't know how to test to see if on dashboard
+  await expect(page).toHaveURL("/");
+});
