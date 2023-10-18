@@ -6,7 +6,7 @@ export default function Modal({
   onClose,
   title,
   children,
-}: {
+}: {  
   onClose: onClose;
   title: string;
   children: ReactNode;

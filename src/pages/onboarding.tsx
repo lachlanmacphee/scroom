@@ -1,10 +1,10 @@
 import { type GetServerSidePropsContext } from "next";
 import { getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-
 import JoinTeam from "~/components/onboarding/joinTeam";
 import NewTeam from "~/components/onboarding/newTeam";
 import { api } from "~/utils/api";
+
 export default function Onboarding() {
   const router = useRouter();
 
@@ -18,18 +18,18 @@ export default function Onboarding() {
     teamId = teamId[0];
   }
 
-  const updateAndRedirect = async () => {
-    await update();
-    await router.push("/");
-  };
-
   const handleNewTeamSubmit = (teamName: string, projectName: string) => {
     if (!userId) {
       return;
     }
     createMutation.mutate(
       { name: teamName, projectName, userId },
-      { onSuccess: updateAndRedirect },
+      {
+        onSuccess: async () => {
+          await update();
+          await router.push("/");
+        },
+      },
     );
   };
 
@@ -39,7 +39,12 @@ export default function Onboarding() {
     }
     joinMutation.mutate(
       { teamId: teamCode, userId, role: "guest" },
-      { onSuccess: updateAndRedirect },
+      {
+        onSuccess: async () => {
+          await update();
+          await router.push("/");
+        },
+      },
     );
   };
 

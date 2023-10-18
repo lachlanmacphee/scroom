@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import UpsertIssueModal from "./UpsertIssueModal";
 import { AiOutlinePlus } from "react-icons/ai";
-import type { User } from "@prisma/client";
+import type { User , Status } from "@prisma/client";
 
 export default function AddIssueButton({
   backlog,
   teamUsers,
+  statuses
 }: {
   backlog: string;
   teamUsers: User[];
+  statuses: Status[];
 }) {
   const [showAddIssueModal, setShowAddIssueModal] = useState(false);
   return (
@@ -18,6 +20,7 @@ export default function AddIssueButton({
           onClose={() => setShowAddIssueModal(false)}
           backlog={backlog}
           teamUsers={teamUsers}
+          statuses={statuses}
         />
       )}
 

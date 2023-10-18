@@ -2,11 +2,9 @@ import React from "react";
 import { getSession } from "next-auth/react";
 import SuperJSON from "superjson";
 import { prisma } from "~/server/db";
-
 import type { User, Team } from "@prisma/client";
 import type { PointsDict } from "~/utils/types";
 import { type GetServerSidePropsContext } from "next";
-
 import UserTable from "~/components/team/UserTable";
 import ResetTeamButton from "~/components/team/ResetTeamButton";
 import TeamDetailsButton from "~/components/team/TeamDetailsButton";

@@ -1,13 +1,15 @@
-import { type Issue } from "@prisma/client";
+import { type Status, type Issue } from "@prisma/client";
 import React from "react";
 import { type UpdateIssue } from "~/utils/types";
 
 export default function StatusDropdown({
   issue,
   updateIssue,
+  statuses
 }: {
   issue: Issue;
   updateIssue: UpdateIssue;
+  statuses: Status[];
 }) {
   return (
     <select
@@ -17,9 +19,11 @@ export default function StatusDropdown({
       defaultValue={issue.status ?? "toDo"}
       onChange={(e) => updateIssue({ id: issue.id, status: e.target.value })}
     >
-      <option value="toDo">To Do</option>
-      <option value="inProgress">In Progress</option>
-      <option value="done">Done</option>
+      {statuses.map((status) => (
+        <option key={status.value} value={status.value}>
+          {status.title}
+        </option>
+      ))}
     </select>
   );
 }

@@ -27,6 +27,20 @@ export type UserPartialSchema = z.infer<typeof userPartialSchema>;
 
 export type IssueFormSchema = z.infer<typeof issueFormSchema>;
 
+export const issuePartialSchema = z.object({
+  status: z.string(),
+});
+
+export type IssuePartialSchema = z.infer<typeof issuePartialSchema>;
+
+
+export const statusSchema = z.object({
+  title: z.string(),
+});
+
+export type StatusSchema = z.infer<typeof statusSchema>;
+
+
 export type UpdateIssueInputs = {
   id: string;
   summary?: string;
@@ -38,6 +52,13 @@ export type UpdateIssueInputs = {
 };
 
 export type UpdateIssue = (data: UpdateIssueInputs) => void;
+
+export type AddNewStatusInputs = {
+  title: string;
+  value: string;
+};
+
+export type AddNewStatus = (data: AddNewStatusInputs) => void;
 
 export const inviteMemberSchema = z.object({
   toEmail: z.string(),
