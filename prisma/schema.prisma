@@ -95,7 +95,7 @@ model Issue {
     team     Team    @relation(fields: [teamId], references: [id])
     sprint   Sprint? @relation(fields: [sprintId], references: [id])
     issueComments      IssueComment[]
-
+    
     @@index([teamId])
     @@index([userId])
     @@index([sprintId])

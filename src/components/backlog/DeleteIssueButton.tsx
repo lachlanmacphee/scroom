@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { type Issue } from "@prisma/client";
 import DeleteIssueModal from "./DeleteIssueModal";
+import { type Issue } from "@prisma/client";
 import { ImBin } from "react-icons/im";
 
 export default function DeleteIssueButton({ issue }: { issue: Issue }) {
@@ -9,11 +9,11 @@ export default function DeleteIssueButton({ issue }: { issue: Issue }) {
   return (
     <>
       {showDeleteIssueModal && (
-          <DeleteIssueModal
-            onClose={() => setShowDeleteIssueModal(false)}
-            issue={issue}
-          />
-        )}
+        <DeleteIssueModal
+          onClose={() => setShowDeleteIssueModal(false)}
+          issue={issue}
+        />
+      )}
       <button
         className="mr-2 inline-flex items-center rounded-lg bg-red-600 p-2.5 text-center text-sm font-medium text-white"
         onClick={() => setShowDeleteIssueModal(true)}

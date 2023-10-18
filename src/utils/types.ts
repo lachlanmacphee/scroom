@@ -9,7 +9,8 @@ export type PointsDict = Record<string, Points>;
 
 export type onClose = () => void;
 export type voidReturnFunc = () => void;
-export type clickHandlerFunc = (e:string) => void;
+export type clickHandlerFunc = (e: string) => void;
+export type onClick = () => void;
 
 export const issueFormSchema = z.object({
   summary: z.string(),
@@ -18,6 +19,7 @@ export const issueFormSchema = z.object({
   userId: z.string(),
   type: z.string(),
   estimate: z.string(),
+  description: z.string(),
 });
 
 export const userPartialSchema = z.object({
@@ -50,6 +52,7 @@ export type UpdateIssueInputs = {
   estimate?: string;
   type?: string;
   userId?: string;
+  description?: string;
 };
 
 export type UpdateIssue = (data: UpdateIssueInputs) => void;
@@ -118,4 +121,6 @@ export const editSprintSchema = z.object({
 });
 
 export type EditSprintSchema = z.infer<typeof editSprintSchema>;
+export type AddComment = (newComment: Comment) => void;
 
+export type DeleteComment = (commentId: string) => void;
