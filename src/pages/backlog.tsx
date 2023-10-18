@@ -122,6 +122,7 @@ export default function Backlog({
         onDragStart={onDragStart}
         onDragOver={onDragOver}
         onDragEnd={onDragEnd}
+        aria-describedby="Draggable issues between sprint and product backlog"
       >
         <div className="grid grid-cols-1 gap-4">
           <BacklogContainer
@@ -139,6 +140,8 @@ export default function Backlog({
             updateIssue={updateIssue}
             statuses={statuses}
             sprint={selectedSprint ?? undefined}
+            aria-live="polite"
+            aria-atomic="true"
           />
           <BacklogContainer
             title={productBacklog.title}
@@ -149,6 +152,8 @@ export default function Backlog({
             updateIssue={updateIssue}
             statuses={statuses}
             sprint={currentSprint}
+            aria-live="polite"
+            aria-atomic="true"
           />
         </div>
         <DragOverlay adjustScale={false}>
