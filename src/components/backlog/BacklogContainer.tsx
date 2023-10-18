@@ -49,7 +49,7 @@ function BacklogContainer({
       <div
         ref={setNodeRef}
         id={`${id}-container`}
-        className="min-h-[400px] rounded-lg p-6 dark:bg-gray-800"
+        className="min-h-[400px] rounded-lg bg-gray-100 p-6 dark:bg-gray-800"
       >
         <div className="flex max-h-[400px] flex-grow flex-col gap-4 overflow-y-auto">
           {issues.map((issue) => (
