@@ -13,7 +13,6 @@ export default function DailyScrumItem({
   user: User;
 }) {
   const [showAddModal, setShowAddModal] = useState(false);
-
   const editHandler = () => {
     setShowAddModal(true);
   };
