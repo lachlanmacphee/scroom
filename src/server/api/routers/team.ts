@@ -5,6 +5,7 @@ import { prisma } from "~/server/db";
 import { createTransport } from "nodemailer";
 import { env } from "~/env.mjs";
 import { TRPCError } from "@trpc/server";
+import { defaultColumns } from "~/utils/constants";
 
 export const teamRouter = createTRPCRouter({
   create: protectedProcedure
@@ -23,7 +24,31 @@ export const teamRouter = createTRPCRouter({
         where: { id: userId },
         data: { teamId: team.id, role: "admin" },
       });
-      return { team, user };
+
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + 7);
+
+      const sprint = await prisma.sprint.create({
+        data: {
+          name: "Sprint 0",
+          teamId: team.id,
+          startDate,
+          endDate,
+        },
+      });
+
+      for (const column of defaultColumns) {
+        await prisma.status.create({
+          data: {
+            title: column.title,
+            value: column.value,
+            teamId: team.id,
+          },
+        });
+      }
+
+      return { team, user, sprint };
     }),
 
   update: protectedProcedure

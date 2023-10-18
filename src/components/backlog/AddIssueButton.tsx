@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import NewUpsertIssueModal from "./NewUpsertIssueModal";
 import { AiOutlinePlus } from "react-icons/ai";
 import type { User, Status, Sprint } from "@prisma/client";
-import { useSession } from "next-auth/react";
 
 export default function AddIssueButton({
   backlog,
@@ -26,7 +25,6 @@ export default function AddIssueButton({
           sprint={sprint}
           teamUsers={teamUsers}
           statuses={statuses}
-          setTheEditMode={setTheEditMode}
         />
       )}
 

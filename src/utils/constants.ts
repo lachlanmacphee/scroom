@@ -15,6 +15,7 @@ export const defaultColumns = [
 ];
 
 export const oneDayInMs = 1000 * 60 * 60 * 24;
+
 export const backlogContainers = {
   sprint: {
     title: "Sprint Backlog",

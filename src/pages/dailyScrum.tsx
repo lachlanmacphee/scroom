@@ -81,15 +81,15 @@ export default function DailyScrum({
               <p className="p-2 text-lg dark:text-white">My Daily Scrum</p>
               {userDailyScrum == null && selectedDate === todayString && (
                 <button
-                  className="h-20 w-full rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600"
+                  className="h-20 w-full rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-400 dark:text-white text-4xl"
                   onClick={() => setShowAddModal(true)}
                 >
                   +
                 </button>
               )}
               {userDailyScrum == null && selectedDate != todayString && (
-                <div className="flex h-20 w-full items-center justify-center rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
-                  <p className="text-center text-xs ">No data on this day</p>
+                <div className="flex h-20 w-full items-center justify-center rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-400">
+                  <p className="text-center text-xs dark:text-white ">No data on this day</p>
                 </div>
               )}
               {userDailyScrum != null && (

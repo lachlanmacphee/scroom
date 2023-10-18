@@ -53,7 +53,7 @@ export default function NewSprintModal({
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-4 p-4"
-        id="upsert-issue-form"
+        id="new-sprint-form"
       >
         <p>{error}</p>
         <div className="flex flex-col gap-2">

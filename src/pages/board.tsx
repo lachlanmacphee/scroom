@@ -17,7 +17,6 @@ import {
 } from "@dnd-kit/core";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useRouter } from "next/router";
-import { defaultColumns } from "~/utils/constants";
 import SuperJSON from "superjson";
 
 export default function ScrumBoard({
@@ -137,27 +136,22 @@ export default function ScrumBoard({
           <AiOutlinePlus size="1em" color="white" />
         </button>
       </div>
-      <div className="overflow-x-auto">
-        <DndContext onDragEnd={onDragEnd} sensors={sensors}>
-          <div
-            className="flex"
-            style={{ minWidth: `${statuses.length * 300}px` }}
-          >
-            {statuses.map((col) => (
-              <IssueContainer
-                key={col.value}
-                containerValue={col.value}
-                containerTitle={col.title}
-                containerId={col.id}
-                issues={issues.filter((issue) => issue.status === col.value)}
-                deleteColumn={deleteColumn}
-                teamUsers={teamUsers}
-                statuses={statuses}
-              />
-            ))}
-          </div>
-        </DndContext>
-      </div>
+      <DndContext onDragEnd={onDragEnd} sensors={sensors}>
+        <div className="flex gap-2 px-2">
+          {statuses.map((col) => (
+            <IssueContainer
+              key={col.value}
+              containerValue={col.value}
+              containerTitle={col.title}
+              containerId={col.id}
+              issues={issues.filter((issue) => issue.status === col.value)}
+              deleteColumn={deleteColumn}
+              teamUsers={teamUsers}
+              statuses={statuses}
+            />
+          ))}
+        </div>
+      </DndContext>
     </div>
   );
 
@@ -266,37 +260,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       teamId: session.user.teamId,
     },
   });
-
-  if (statuses.length === 0) {
-    const teamId = team?.id;
-
-    if (teamId) {
-      for (const column of defaultColumns) {
-        await prisma.status.create({
-          data: {
-            title: column.title,
-            value: column.value,
-            teamId: team.id,
-          },
-        });
-      }
-
-      const updatedStatuses = await prisma.status.findMany({
-        select: {
-          id: true,
-          value: true,
-          title: true,
-        },
-        where: {
-          teamId: session.user.teamId,
-        },
-      });
-
-      return {
-        props: { issues, team, statuses: updatedStatuses },
-      };
-    }
-  }
 
   return {
     props: {

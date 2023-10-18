@@ -3,7 +3,7 @@ import type { Issue, Status, User } from "@prisma/client";
 import { CSS } from "@dnd-kit/utilities";
 import { useDraggable } from "@dnd-kit/core";
 import IssueStoryPoints from "./IssueStoryPoints";
-import UpsertIssueModal from "../backlog/UpsertIssueModal";
+import NewUpsertIssueModal from "../backlog/NewUpsertIssueModal";
 
 interface IssueProps {
   issue: Issue;
@@ -30,7 +30,7 @@ export default function IssueItem({ issue, teamUsers, statuses }: IssueProps) {
   return (
     <>
       {isIssueModalOpen && (
-        <UpsertIssueModal
+        <NewUpsertIssueModal
           onClose={() => setIsIssueModalOpen(false)}
           teamUsers={teamUsers}
           issue={issue}

@@ -53,7 +53,7 @@ export default function AddDailyScrumModal({
 
   const { refetch } = api.dailyScrum.get.useQuery({
     datePosted: datePosted,
-    teamId: teamId ?? ""
+    teamId: teamId ?? "",
   });
 
   const endSubmit = async () => {
@@ -66,7 +66,7 @@ export default function AddDailyScrumModal({
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-4 p-4"
-        id="upsert-issue-form"
+        id="upsert-daily-scrum-form"
       >
         <div className="mb-6 grid gap-6">
           <div>
