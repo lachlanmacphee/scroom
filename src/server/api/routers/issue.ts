@@ -62,4 +62,19 @@ export const issueRouter = createTRPCRouter({
       const issue = await prisma.issue.delete({ where: { id: input.id } });
       return issue;
     }),
+
+  updateStatus: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        status: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const issue = await prisma.issue.update({
+        data: input,
+        where: { id: input.id },
+      });
+      return issue;
+    }),
 });

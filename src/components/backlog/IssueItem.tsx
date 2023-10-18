@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { Issue, User } from "@prisma/client";
+import type { Issue, User, Status } from "@prisma/client";
 import UpsertIssueModal from "./UpsertIssueModal";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -14,13 +14,14 @@ export function IssueItem({
   issue,
   teamUsers,
   updateIssue,
+  statuses,
 }: {
   issue: Issue;
   teamUsers: User[];
   updateIssue: UpdateIssue;
+  statuses: Status[];
 }) {
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
-
   const {
     attributes,
     listeners,
@@ -58,7 +59,11 @@ export function IssueItem({
     >
       <SummaryItem issue={issue} updateIssue={updateIssue} />
       <div className="flex gap-2">
-        <StatusDropdown issue={issue} updateIssue={updateIssue} />
+        <StatusDropdown
+          issue={issue}
+          updateIssue={updateIssue}
+          statuses={statuses}
+        />
         <EditIssueButton editHandler={editIssueHandler} />
         <DeleteIssueButton issue={issue} />
       </div>
@@ -67,6 +72,7 @@ export function IssueItem({
           onClose={() => setIsIssueModalOpen(false)}
           issue={issue}
           teamUsers={teamUsers}
+          statuses={statuses}
         />
       )}
     </div>

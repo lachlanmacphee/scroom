@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { type GetServerSidePropsContext } from "next";
 import { getSession, useSession } from "next-auth/react";
-import type { Issue, Team, User } from "@prisma/client";
+import type { Issue, Team, User, Status } from "@prisma/client";
 import { prisma } from "~/server/db";
 import { arrayMove } from "@dnd-kit/sortable";
 import BacklogContainer from "~/components/backlog/BacklogContainer";
@@ -27,11 +27,13 @@ export default function Backlog({
   dataIssues,
   team,
   teamUsers,
+  statuses
 }: {
   dataIssues: Issue[];
   teamId: string;
   team: Team;
   teamUsers: User[];
+  statuses: Status[];
 }) {
   const [activeIssue, setActiveIssue] = useState<Issue | null>(null);
   const [activeContainer, setActiveContainer] = useState<string | null>(null);
@@ -82,6 +84,7 @@ export default function Backlog({
               issues={issues.filter((issue) => issue.backlog === container.id)}
               teamUsers={teamUsers}
               updateIssue={updateIssue}
+              statuses={statuses}
             />
           ))}
         </div>
@@ -91,6 +94,7 @@ export default function Backlog({
               issue={activeIssue}
               teamUsers={teamUsers}
               updateIssue={updateIssue}
+              statuses={statuses}
             />
           )}
         </DragOverlay>
@@ -236,12 +240,23 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     },
   });
 
+  const statuses = await prisma.status.findMany({
+    select: {
+      value: true,
+      title: true,
+    },
+    where: {
+      teamId: session.user.teamId,
+    },
+  });
+
   return {
     props: {
       teamUsers,
       dataIssues,
       teamId,
       team,
+      statuses,
     },
   };
 }

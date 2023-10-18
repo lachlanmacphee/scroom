@@ -1,14 +1,15 @@
-export const columns = [
+// Required
+export const defaultColumns = [
   {
-    id: "toDo",
+    value: "toDo",
     title: "To Do",
   },
   {
-    id: "inProgress",
+    value: "inProgress",
     title: "In Progress",
   },
   {
-    id: "done",
+    value: "done",
     title: "Done",
   },
 ];

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
-import { type Issue, type User } from "@prisma/client";
+import { type Issue, type User , type Status} from "@prisma/client";
 import Modal from "../common/Modal";
 import { api } from "~/utils/api";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,16 +13,19 @@ import {
 import { useTour } from "@reactour/tour";
 import { useSession } from "next-auth/react";
 
+
 export default function UpsertIssueModal({
   onClose,
   issue,
   backlog,
   teamUsers,
+  statuses,
 }: {
   onClose: onClose;
   issue?: Issue;
   backlog?: string;
   teamUsers: User[];
+  statuses: Status[];
 }) {
   const router = useRouter();
   const { setCurrentStep, isOpen } = useTour();
@@ -30,6 +33,7 @@ export default function UpsertIssueModal({
   const teamId = session?.user.teamId;
   const createMutation = api.issue.create.useMutation();
   const updateMutation = api.issue.update.useMutation();
+
 
   const { register, handleSubmit } = useForm<IssueFormSchema>({
     resolver: zodResolver(issueFormSchema),
@@ -90,9 +94,11 @@ export default function UpsertIssueModal({
                 className="w-3/4 rounded-md border border-gray-900"
                 {...register("status")}
               >
-                <option value="toDo">To Do</option>
-                <option value="inProgress">In Progress</option>
-                <option value="done">Done</option>
+                {statuses.map((status) => (
+                  <option key={status.value} value={status.value}>
+                    {status.title}
+                  </option>
+                ))}
               </select>
             </div>
           )}
@@ -167,3 +173,5 @@ export default function UpsertIssueModal({
     </Modal>
   );
 }
+
+
