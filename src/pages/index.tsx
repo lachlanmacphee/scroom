@@ -66,10 +66,28 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     };
   }
 
+  const sprints = await prisma.sprint.findMany({
+    where: {
+      teamId: session.user.teamId,
+    },
+    orderBy: {
+      startDate: "asc",
+    },
+  });
+
+  const currentTime = new Date().getTime();
+  const currentSprint =
+    sprints.find(
+      (sprint) =>
+        sprint.startDate.getTime() <= currentTime &&
+        currentTime <= sprint.endDate.getTime(),
+    ) ?? null;
+
   const recentIssues = await prisma.issue.findMany({
     where: {
       teamId: session.user.teamId,
       userId: session.user.id,
+      sprintId: currentSprint?.id,
     },
     select: {
       id: true,
