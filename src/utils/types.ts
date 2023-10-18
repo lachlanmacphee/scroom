@@ -18,6 +18,13 @@ export const issueFormSchema = z.object({
   estimate: z.string(),
 });
 
+export const userPartialSchema = z.object({
+  name: z.string(),
+  image: z.string(),
+});
+
+export type UserPartialSchema = z.infer<typeof userPartialSchema>;
+
 export type IssueFormSchema = z.infer<typeof issueFormSchema>;
 
 export type UpdateIssueInputs = {
