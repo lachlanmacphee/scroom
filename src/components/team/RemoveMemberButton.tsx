@@ -12,15 +12,21 @@ export default function RemoveMemberButton({ user }: { user: User }) {
   const [remove, setRemove] = useState("");
   const removeMutation = api.team.remove.useMutation();
 
-  const handleRemoveMember = async () => {
-    removeMutation.mutate({ userId: user.id });
-    handleClose();
-    await router.replace(router.asPath);
-  };
-
   const handleClose = () => {
     setRemove("");
     setIsRemoveModalOpen(false);
+  };
+
+  const handleRemoveMember = () => {
+    removeMutation.mutate(
+      { userId: user.id },
+      {
+        onSuccess: async () => {
+          handleClose();
+          await router.replace(router.asPath);
+        },
+      },
+    );
   };
 
   return (

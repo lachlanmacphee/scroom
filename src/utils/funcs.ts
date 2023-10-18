@@ -210,3 +210,7 @@ export function sprintExists(
   }
   return alreadyExists;
 }
+
+export function countAdmins(users: User[]): number {
+  return users.filter((user) => user.role === "admin").length;
+}

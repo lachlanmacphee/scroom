@@ -40,7 +40,7 @@ export default function Team({
         <div className="flex gap-3">
           {isAdmin && <TeamDetailsButton team={team} />}
           {isAdmin && <ResetTeamButton team={team} />}
-          {!isAdmin && <LeaveTeamButton />}
+          <LeaveTeamButton users={users}/>
           {isAdmin && <InviteMemberButton team={team} />}
         </div>
       </div>
