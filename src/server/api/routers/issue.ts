@@ -1,7 +1,9 @@
+import { IssueComment } from "@prisma/client";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
+import { api } from "~/utils/api";
 
 export const issueRouter = createTRPCRouter({
   create: protectedProcedure
@@ -15,6 +17,7 @@ export const issueRouter = createTRPCRouter({
         estimate: z.string(),
         teamId: z.string(),
         sprintId: z.string().nullable().optional(),
+        description: z.string(),
       }),
     )
     .mutation(async ({ input }) => {

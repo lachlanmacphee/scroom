@@ -8,8 +8,8 @@ import { prisma } from "~/server/db";
 import { arrayMove } from "@dnd-kit/sortable";
 import BacklogContainer from "~/components/backlog/BacklogContainer";
 import { IssueItem } from "~/components/backlog/IssueItem";
-import { backlogContainers } from "~/utils/constants";
 import NewSprintButton from "~/components/backlog/NewSprintButton";
+
 import {
   DndContext,
   type DragEndEvent,
