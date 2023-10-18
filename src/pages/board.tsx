@@ -32,6 +32,7 @@ export default function ScrumBoard({
   teamUsers: User[];
   sprintsJSON: string;
 }) {
+  // add comment to trigger redeploy
   const sprints: Sprint[] = SuperJSON.parse(sprintsJSON);
   const updateMutation = api.issue.update.useMutation();
   const statusMutation = api.status.create.useMutation();
