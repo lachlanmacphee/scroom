@@ -5,6 +5,8 @@ import type {
   ContributionDataType,
   ExpectedGraphDataType,
   PointsDict,
+  EditSprintSchema,
+  NewSprintSchema,
 } from "~/utils/types";
 import { oneDayInMs } from "./constants";
 
@@ -182,4 +184,29 @@ export function convertToContributionData(
   });
 
   return Object.values(assigneeData);
+}
+
+export function sprintExists(
+  currentSprints: Sprint[],
+  data: EditSprintSchema | NewSprintSchema,
+) {
+  let alreadyExists = false;
+  const dataStartDate = new Date(data.startDate);
+  const dataEndDate = new Date(data.endDate);
+
+  for (const s of currentSprints) {
+    if (
+      (dataStartDate.getTime() >= s.startDate.getTime() &&
+        dataEndDate.getTime() <= s.endDate.getTime()) ||
+      (dataStartDate.getTime() <= s.startDate.getTime() &&
+        dataEndDate.getTime() >= s.startDate.getTime()) ||
+      (dataEndDate.getTime() >= s.endDate.getTime() &&
+        dataStartDate.getTime() <= s.endDate.getTime()) ||
+      (dataStartDate.getTime() <= s.startDate.getTime() &&
+        dataEndDate.getTime() >= s.endDate.getTime())
+    ) {
+      alreadyExists = true;
+    }
+  }
+  return alreadyExists;
 }

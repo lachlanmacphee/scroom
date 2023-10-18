@@ -1,16 +1,16 @@
 import React from "react";
-import type { Issue, User, Status } from "@prisma/client";
+import type { Issue, User, Status, Sprint } from "@prisma/client";
 import { IssueItem } from "./IssueItem";
 import { useDroppable } from "@dnd-kit/core";
 import AddIssueButton from "./AddIssueButton";
 import { type UpdateIssue } from "~/utils/types";
-
 
 interface ContainerProps {
   title?: string;
   id: string;
   issues: Issue[];
   teamUsers: User[];
+  sprint?: Sprint;
   updateIssue: UpdateIssue;
   statuses: Status[];
 }
@@ -20,6 +20,7 @@ function BacklogContainer({
   id,
   issues,
   teamUsers,
+  sprint,
   updateIssue,
   statuses,
 }: ContainerProps) {
@@ -29,7 +30,6 @@ function BacklogContainer({
       type: "container",
     },
   });
-
   return (
     <>
       <div className="flex items-center justify-between px-2">
@@ -39,7 +39,12 @@ function BacklogContainer({
         >
           {title}
         </h1>
-        <AddIssueButton teamUsers={teamUsers} backlog={id} statuses={statuses} />
+        <AddIssueButton
+          teamUsers={teamUsers}
+          backlog={id}
+          statuses={statuses}
+          sprint={sprint}
+        />
       </div>
       <div
         ref={setNodeRef}
@@ -63,5 +68,3 @@ function BacklogContainer({
 }
 
 export default BacklogContainer;
-
-

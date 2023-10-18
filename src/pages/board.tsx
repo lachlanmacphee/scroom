@@ -6,7 +6,7 @@ import { prisma } from "~/server/db";
 import { api } from "~/utils/api";
 import { type GetServerSidePropsContext } from "next";
 import { getSession, useSession } from "next-auth/react";
-import type { Issue, Team, User, Status } from "@prisma/client";
+import type { Issue, Team, User, Status, Sprint } from "@prisma/client";
 import IssueContainer from "~/components/board/IssueContainer";
 import {
   DndContext,
@@ -18,18 +18,22 @@ import {
 import { AiOutlinePlus } from "react-icons/ai";
 import { useRouter } from "next/router";
 import { defaultColumns } from "~/utils/constants";
+import SuperJSON from "superjson";
 
 export default function ScrumBoard({
   issues,
   team,
   statuses,
   teamUsers,
+  sprintsJSON,
 }: {
   issues: Issue[];
   team: Team;
   statuses: Status[];
   teamUsers: User[];
+  sprintsJSON: string;
 }) {
+  const sprints: Sprint[] = SuperJSON.parse(sprintsJSON);
   const updateMutation = api.issue.update.useMutation();
   const statusMutation = api.status.create.useMutation();
   const deleteMutation = api.status.delete.useMutation();
@@ -93,6 +97,13 @@ export default function ScrumBoard({
       updateIssue(active.id.toString(), over.id.toString());
     }
   }
+  const currentTime = new Date().getTime();
+  const currentSprint =
+    sprints.find(
+      (sprint) =>
+        sprint.startDate.getTime() <= currentTime &&
+        currentTime <= sprint.endDate.getTime(),
+    ) ?? null;
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -111,6 +122,9 @@ export default function ScrumBoard({
         <h2 className="text-lg font-semibold text-gray-600 dark:text-gray-400">
           {team.projectName}
         </h2>
+        <h3 className="text-2xl font-semibold text-gray-400 dark:text-gray-200">
+          Current Sprint: {currentSprint?.name}
+        </h3>
       </div>
       <div className="flex justify-end p-5">
         <button
@@ -182,6 +196,23 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     return;
   }
 
+  const sprints = await prisma.sprint.findMany({
+    where: {
+      teamId: session.user.teamId,
+    },
+    orderBy: {
+      startDate: "asc",
+    },
+  });
+
+  const currentTime = new Date().getTime();
+  const currentSprint =
+    sprints.find(
+      (sprint) =>
+        sprint.startDate.getTime() <= currentTime &&
+        currentTime <= sprint.endDate.getTime(),
+    ) ?? null;
+
   const issues = await prisma.issue.findMany({
     select: {
       id: true,
@@ -194,6 +225,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       userId: true,
     },
     where: {
+      sprintId: currentSprint?.id,
       backlog: "sprint",
       teamId: session.user.teamId,
     },
@@ -267,6 +299,12 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   }
 
   return {
-    props: { issues, team, teamUsers, statuses },
+    props: {
+      issues,
+      team,
+      teamUsers,
+      statuses,
+      sprintsJSON: SuperJSON.stringify(sprints),
+    },
   };
 }

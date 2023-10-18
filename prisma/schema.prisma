@@ -136,6 +136,7 @@ model DailyScrum {
 
     @@index([teamId])
     @@index([userId])
+
 }
 
 model IssueComment {

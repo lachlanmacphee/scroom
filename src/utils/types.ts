@@ -44,6 +44,7 @@ export type UpdateIssueInputs = {
   summary?: string;
   status?: string;
   backlog?: string;
+  sprintId?: string | null;
   estimate?: string;
   type?: string;
   userId?: string;
@@ -98,3 +99,21 @@ export type BurndownGraphDataOutput = {
   actualBurndownData: ActualGraphDataType[];
   expectedBurndownData: ExpectedGraphDataType[];
 };
+
+export const newSprintSchema = z.object({
+  name: z.string(),
+  startDate: z.string(),
+  endDate: z.string(),
+});
+
+export type NewSprintSchema = z.infer<typeof newSprintSchema>;
+
+export const editSprintSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  startDate: z.string(),
+  endDate: z.string(),
+});
+
+export type EditSprintSchema = z.infer<typeof editSprintSchema>;
+

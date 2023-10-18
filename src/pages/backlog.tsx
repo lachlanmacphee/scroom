@@ -3,12 +3,13 @@
 import React, { useEffect, useState } from "react";
 import { type GetServerSidePropsContext } from "next";
 import { getSession, useSession } from "next-auth/react";
-import type { Issue, Team, User, Status } from "@prisma/client";
+import type { Issue, Team, User, Status, Sprint } from "@prisma/client";
 import { prisma } from "~/server/db";
 import { arrayMove } from "@dnd-kit/sortable";
 import BacklogContainer from "~/components/backlog/BacklogContainer";
 import { IssueItem } from "~/components/backlog/IssueItem";
-import { containers } from "~/utils/constants";
+import { backlogContainers } from "~/utils/constants";
+import NewSprintButton from "~/components/backlog/NewSprintButton";
 import {
   DndContext,
   type DragEndEvent,
@@ -22,22 +23,40 @@ import {
 } from "@dnd-kit/core";
 import { api } from "~/utils/api";
 import { type UpdateIssueInputs } from "~/utils/types";
+import EditSprintButton from "~/components/backlog/EditSprintButton";
+import SuperJSON from "superjson";
 
 export default function Backlog({
   dataIssues,
   team,
   teamUsers,
-  statuses
+  statuses,
+  sprintsJSON,
 }: {
   dataIssues: Issue[];
-  teamId: string;
   team: Team;
   teamUsers: User[];
   statuses: Status[];
+  sprintsJSON: string;
 }) {
+  const sprints: Sprint[] = SuperJSON.parse(sprintsJSON);
   const [activeIssue, setActiveIssue] = useState<Issue | null>(null);
   const [activeContainer, setActiveContainer] = useState<string | null>(null);
   const [issues, setIssues] = useState<Issue[]>(dataIssues);
+  const currentTime = new Date().getTime();
+  const currentSprint =
+    sprints.find(
+      (sprint) =>
+        sprint.startDate.getTime() <= currentTime &&
+        currentTime <= sprint.endDate.getTime(),
+    ) ?? undefined;
+  const [selectedSprintId, setSelectedSprintId] = useState(
+    currentSprint?.id ?? sprints[0]?.id ?? undefined,
+  );
+  const selectedSprint = sprints.find(
+    (sprint) => sprint.id === selectedSprintId,
+  );
+  const { sprint: sprintBacklog, product: productBacklog } = backlogContainers;
   const updateMutation = api.issue.update.useMutation();
   const { data: session } = useSession();
 
@@ -58,15 +77,44 @@ export default function Backlog({
   const updateIssue = (data: UpdateIssueInputs) => {
     const teamId = session?.user.teamId;
     if (!teamId) return;
-    updateMutation.mutate({ ...data, teamId });
+    if (data.backlog === "sprint") {
+      data.sprintId = selectedSprintId;
+    } else {
+      data.sprintId = null;
+    }
+    updateMutation.mutate({
+      ...data,
+      teamId,
+    });
+    const filteredIssues = issues.filter((issue) => issue.id !== data.id);
+    const currentIssue = issues.find((issue) => issue.id === data.id);
+    const updatedIssue = { ...currentIssue, ...data } as Issue;
+    setIssues([...filteredIssues, updatedIssue]);
   };
-
   return (
     <div className="flex flex-grow flex-col bg-white px-12 pb-12 dark:bg-slate-700">
-      <div className="flex pb-4 pt-8">
-        <h1 className="flex-auto text-center text-3xl font-bold dark:text-white">
+      <div className="flex flex-col items-center justify-center gap-2 pb-4 pt-8">
+        <h1 className="text-center text-3xl font-bold dark:text-white">
           {team.projectName}
         </h1>
+        <div className="flex items-center gap-2 text-center dark:text-white">
+          <NewSprintButton sprints={sprints} />
+          {sprints.length !== 0 && (
+            <select
+              className="block w-32 rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+              data-testid="sprintDropDown"
+              value={selectedSprintId}
+              onChange={(e) => setSelectedSprintId(e.target.value)}
+            >
+              {sprints.map((sprint) => (
+                <option key={sprint.id} value={sprint.id}>
+                  {sprint.name}
+                </option>
+              ))}
+            </select>
+          )}
+          {sprints.length !== 0 && <EditSprintButton sprints={sprints} />}
+        </div>
       </div>
       <DndContext
         sensors={sensors}
@@ -76,17 +124,32 @@ export default function Backlog({
         onDragEnd={onDragEnd}
       >
         <div className="grid grid-cols-1 gap-4">
-          {containers.map((container) => (
-            <BacklogContainer
-              title={container.title}
-              key={container.title}
-              id={container.id}
-              issues={issues.filter((issue) => issue.backlog === container.id)}
-              teamUsers={teamUsers}
-              updateIssue={updateIssue}
-              statuses={statuses}
-            />
-          ))}
+          <BacklogContainer
+            title={sprintBacklog.title}
+            key={sprintBacklog.title}
+            id={sprintBacklog.id}
+            issues={
+              (currentSprint &&
+                issues.filter(
+                  (issue) => issue.sprintId === selectedSprintId,
+                )) ??
+              []
+            }
+            teamUsers={teamUsers}
+            updateIssue={updateIssue}
+            statuses={statuses}
+            sprint={selectedSprint ?? undefined}
+          />
+          <BacklogContainer
+            title={productBacklog.title}
+            key={productBacklog.title}
+            id={productBacklog.id}
+            issues={issues.filter((issue) => issue.backlog === "product")}
+            teamUsers={teamUsers}
+            updateIssue={updateIssue}
+            statuses={statuses}
+            sprint={currentSprint}
+          />
         </div>
         <DragOverlay adjustScale={false}>
           {activeIssue && (
@@ -211,6 +274,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       estimate: true,
       type: true,
       userId: true,
+      sprintId: true,
     },
     where: {
       teamId: teamId,
@@ -228,6 +292,15 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     },
   });
 
+  const sprints = await prisma.sprint.findMany({
+    where: {
+      teamId: teamId,
+    },
+    orderBy: {
+      startDate: "asc",
+    },
+  });
+
   const teamUsers = await prisma.user.findMany({
     select: {
       id: true,
@@ -236,7 +309,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       role: true,
     },
     where: {
-      teamId: session.user?.teamId,
+      teamId,
     },
   });
 
@@ -257,6 +330,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       teamId,
       team,
       statuses,
+      sprintsJSON: SuperJSON.stringify(sprints),
     },
   };
 }

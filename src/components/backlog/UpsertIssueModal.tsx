@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
-import { type Issue, type User , type Status} from "@prisma/client";
+import type { Issue, User, Status, Sprint } from "@prisma/client";
 import Modal from "../common/Modal";
 import { api } from "~/utils/api";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,19 +13,20 @@ import {
 import { useTour } from "@reactour/tour";
 import { useSession } from "next-auth/react";
 
-
 export default function UpsertIssueModal({
   onClose,
   issue,
   backlog,
   teamUsers,
   statuses,
+  sprint,
 }: {
   onClose: onClose;
   issue?: Issue;
   backlog?: string;
   teamUsers: User[];
   statuses: Status[];
+  sprint?: Sprint;
 }) {
   const router = useRouter();
   const { setCurrentStep, isOpen } = useTour();
@@ -33,7 +34,6 @@ export default function UpsertIssueModal({
   const teamId = session?.user.teamId;
   const createMutation = api.issue.create.useMutation();
   const updateMutation = api.issue.update.useMutation();
-
 
   const { register, handleSubmit } = useForm<IssueFormSchema>({
     resolver: zodResolver(issueFormSchema),
@@ -54,11 +54,23 @@ export default function UpsertIssueModal({
   };
 
   const onSubmit = (data: IssueFormSchema) => {
-    if (!issue && teamId) {
-      createMutation.mutate({ ...data, teamId }, { onSuccess: endSubmit });
+    if (!issue && teamId ) {
+      createMutation.mutate(
+        {
+          ...data,
+          teamId,
+          sprintId: data.backlog === "sprint" ? sprint?.id : null,
+        },
+        { onSuccess: endSubmit },
+      );
     } else if (issue?.id && teamId) {
       updateMutation.mutate(
-        { ...data, id: issue.id, teamId },
+        {
+          ...data,
+          id: issue.id,
+          teamId,
+          sprintId: data.backlog === "sprint" ? sprint?.id : null,
+        },
         { onSuccess: endSubmit },
       );
     }
@@ -110,7 +122,7 @@ export default function UpsertIssueModal({
               className="w-3/4 rounded-md border border-gray-900"
               {...register("backlog")}
             >
-              <option value="sprint">Sprint Backlog</option>
+              <option value="sprint">{sprint?.name} Backlog</option>
               <option value="product">Product Backlog</option>
             </select>
           </div>
@@ -173,5 +185,3 @@ export default function UpsertIssueModal({
     </Modal>
   );
 }
-
-
