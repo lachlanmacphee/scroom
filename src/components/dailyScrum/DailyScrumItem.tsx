@@ -1,6 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
 import React, { useState } from "react";
 import type { DailyScrum, User } from "@prisma/client";
-import Image from "next/image";
 import { FiEdit } from "react-icons/fi";
 import AddDailyScrumModal from "./AddDailyScrumModal";
 import { useSession } from "next-auth/react";
@@ -13,7 +13,7 @@ export default function DailyScrumItem({
   user: User;
 }) {
   const [showAddModal, setShowAddModal] = useState(false);
-  
+
   const editHandler = () => {
     setShowAddModal(true);
   };
@@ -26,15 +26,15 @@ export default function DailyScrumItem({
   return (
     <>
       {showAddModal && (
-          <AddDailyScrumModal
-            onClose={() => setShowAddModal(false)}
-            user = {user}
-            dailyScrum={dailyScrum}
-          />
-        )}
+        <AddDailyScrumModal
+          onClose={() => setShowAddModal(false)}
+          user={user}
+          dailyScrum={dailyScrum}
+        />
+      )}
       <div className="flex flex-col items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white p-3 shadow dark:border-gray-700 dark:bg-gray-800 md:flex-row md:gap-0">
         <div className="flex items-center gap-4">
-          <Image
+          <img
             className="rounded-full"
             src={
               user.image ??
@@ -60,14 +60,16 @@ export default function DailyScrumItem({
             </p>
           </div>
         </div>
-        { (dailyScrum.datePosted.toISOString() == todayString) && (user.id == session?.user.id) && (<button
-          className="mr-2 inline-flex items-center rounded-lg bg-blue-700 p-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          onClick={() => editHandler()}
-          data-testid="edit-button"
-        >
-          <FiEdit fontSize="1.5em" />
-        </button>
-        )}
+        {dailyScrum.datePosted.toISOString() == todayString &&
+          user.id == session?.user.id && (
+            <button
+              className="mr-2 inline-flex items-center rounded-lg bg-blue-700 p-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              onClick={() => editHandler()}
+              data-testid="edit-button"
+            >
+              <FiEdit fontSize="1.5em" />
+            </button>
+          )}
       </div>
     </>
   );
