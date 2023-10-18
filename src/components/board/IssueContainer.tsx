@@ -99,7 +99,12 @@ const IssueContainer = ({
         className="flex min-h-full w-full max-w-sm flex-col gap-3 rounded-lg bg-white p-6 shadow dark:bg-gray-800"
       >
         {issues.map((issue) => (
-          <IssueItem key={issue.id} issue={issue} teamUsers={teamUsers} />
+          <IssueItem
+            key={issue.id}
+            issue={issue}
+            teamUsers={teamUsers}
+            statuses={statuses}
+          />
         ))}
       </div>
     </div>

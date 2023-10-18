@@ -2,16 +2,12 @@ import { type Issue } from "@prisma/client";
 import React, { useEffect, useState } from "react";
 import { type UpdateIssue } from "~/utils/types";
 
-type disableDrag = (changeTo: boolean) => void;
-
 function SummaryItem({
   issue,
   updateIssue,
-  disableDrag,
 }: {
   issue: Issue;
   updateIssue: UpdateIssue;
-  disableDrag: disableDrag;
 }) {
   const [activeName, setActiveName] = useState(issue.summary);
   // To determine whether the user is currently editing the modal - disables dragging
@@ -22,7 +18,6 @@ function SummaryItem({
   }, [issue.summary]);
 
   const handleClick = () => {
-    disableDrag(true);
     setEditMode(true);
   };
 
@@ -39,7 +34,6 @@ function SummaryItem({
           onChange={(e) => setActiveName(e.target.value)}
           autoFocus
           onBlur={() => {
-            disableDrag(false);
             updateIssue({ id: issue.id, summary: activeName });
             setEditMode(false);
           }}
@@ -47,7 +41,6 @@ function SummaryItem({
             if (e.key !== "Enter") {
               return;
             }
-            disableDrag(false);
             updateIssue({ id: issue.id, summary: activeName });
             setEditMode(false);
           }}

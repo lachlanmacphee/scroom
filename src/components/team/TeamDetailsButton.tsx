@@ -10,7 +10,6 @@ import {
   teamDetailsFormSchema,
 } from "~/utils/types";
 import Modal from "~/components/common/Modal";
-import InputGroup from "~/components/common/InputGroup";
 
 export default function TeamDetailsButton({ team }: { team: Team }) {
   const [isTeamDetailsModalOpen, setIsTeamDetailsModalOpen] = useState(false);
@@ -19,12 +18,22 @@ export default function TeamDetailsButton({ team }: { team: Team }) {
 
   const { register, handleSubmit } = useForm<TeamDetailsFormSchema>({
     resolver: zodResolver(teamDetailsFormSchema),
+    defaultValues: {
+      name: team.name,
+      projectName: team.projectName,
+    },
   });
 
-  const onSubmit = async (data: TeamDetailsFormSchema) => {
-    updateMutation.mutate({ ...data, id: team.id });
-    setIsTeamDetailsModalOpen(false);
-    await router.replace(router.asPath);
+  const onSubmit = (data: TeamDetailsFormSchema) => {
+    updateMutation.mutate(
+      { ...data, id: team.id },
+      {
+        onSuccess: async () => {
+          setIsTeamDetailsModalOpen(false);
+          await router.replace(router.asPath);
+        },
+      },
+    );
   };
 
   return (
@@ -44,29 +53,38 @@ export default function TeamDetailsButton({ team }: { team: Team }) {
             onSubmit={handleSubmit(onSubmit)}
             className="flex flex-col gap-4 p-4"
           >
-            <InputGroup
-              htmlFor="name"
-              label="Team Name"
-              name="name"
-              {...(register("name"),
-              {
-                required: true,
-                minLength: 3,
-                defaultValue: team.name,
-              })}
-              data-testid="teamNameField"
-            />
-            <InputGroup
-              htmlFor="projectName"
-              label="Project Name"
-              {...(register("projectName"),
-              {
-                required: true,
-                minLength: 3,
-                defaultValue: team.projectName,
-              })}
-              data-testid="projectNameField"
-            />
+            <div>
+              <label
+                htmlFor="name"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Team Name
+              </label>
+              <input
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                data-testid="teamNameField"
+                {...register("name", {
+                  required: true,
+                  minLength: 3,
+                })}
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="projectName"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Project Name
+              </label>
+              <input
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                data-testid="projectNameField"
+                {...register("projectName", {
+                  required: true,
+                  minLength: 3,
+                })}
+              />
+            </div>
             <div className="flex items-center justify-end space-x-2">
               <button
                 type="submit"

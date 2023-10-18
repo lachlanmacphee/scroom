@@ -15,15 +15,12 @@ import {
   type onClose,
   issueFormSchema,
   type IssueFormSchema,
+  type voidReturnFunc,
 } from "~/utils/types";
 import { useTour } from "@reactour/tour";
 import CommentList from "./CommentList";
-import type { IssueComment } from "@prisma/client";
-import InputGroup from "../common/InputGroup";
-import StatusDropdown from "./StatusDropdown";
+import type { IssueComment, Sprint, Status } from "@prisma/client";
 import { useSession } from "next-auth/react";
-
-type disableDrag = (changeTo: boolean) => void;
 
 export default function NewUpsertIssueModal({
   onClose,
@@ -31,17 +28,19 @@ export default function NewUpsertIssueModal({
   backlog,
   teamUsers,
   currentUserId,
-  disableDrag,
+  sprint,
+  statuses,
 }: {
   onClose: onClose;
   issue?: Issue;
   backlog?: string;
   teamUsers: User[];
   currentUserId?: string;
-  disableDrag: disableDrag;
+  sprint?: Sprint;
+  statuses: Status[];
 }) {
   const router = useRouter();
-  const { setCurrentStep } = useTour();
+  const { setCurrentStep, isOpen } = useTour();
   const createMutation = api.issue.create.useMutation();
   const updateMutation = api.issue.update.useMutation();
   const createCommentMutation = api.issueComment.create.useMutation();
@@ -63,7 +62,7 @@ export default function NewUpsertIssueModal({
   });
 
   let issueComments: IssueComment[] = [];
-  let refetchComments;
+  let refetchComments: voidReturnFunc;
   if (issue) {
     const { data, refetch } = api.issueComment.get.useQuery({
       issueId: issue.id,
@@ -75,21 +74,32 @@ export default function NewUpsertIssueModal({
   }
 
   const endSubmit = async () => {
-    disableDrag(false);
     onClose();
-    setCurrentStep(10);
+    isOpen && setCurrentStep(10);
     await router.replace(router.asPath);
   };
 
   const onSubmit = (data: IssueFormSchema) => {
+    if (!sprint) {
+      return;
+    }
     if (!issue && session?.user.teamId) {
       createMutation.mutate(
-        { ...data, teamId: session?.user.teamId },
+        {
+          ...data,
+          teamId: session?.user.teamId,
+          sprintId: data.backlog === "sprint" ? sprint?.id : null,
+        },
         { onSuccess: endSubmit },
       );
     } else if (issue?.id && session?.user.teamId) {
       updateMutation.mutate(
-        { ...data, id: issue.id, teamId: session?.user.teamId },
+        {
+          ...data,
+          id: issue.id,
+          teamId: session?.user.teamId,
+          sprintId: data.backlog === "sprint" ? sprint?.id : null,
+        },
         { onSuccess: endSubmit },
       );
     }
@@ -103,7 +113,7 @@ export default function NewUpsertIssueModal({
   };
 
   useEffect(() => {
-    setCurrentStep(9);
+    isOpen && setCurrentStep(9);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -149,10 +159,14 @@ export default function NewUpsertIssueModal({
 
   return (
     <Modal title={issue ? "Edit Issue" : "Create Issue"} onClose={onClose}>
-      <form className="px-4 py-4" onSubmit={handleSubmit(onSubmit)}>
+      <form
+        className="px-4 py-4"
+        onSubmit={handleSubmit(onSubmit)}
+        id="upsert-issue-form"
+      >
         <div className="mb-6">
           <label
-            htmlFor="password"
+            htmlFor="summary"
             className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
           >
             Summary
@@ -168,7 +182,7 @@ export default function NewUpsertIssueModal({
         <div className="mb-6 grid gap-6 md:grid-cols-2">
           <div className="mb-1">
             <label
-              htmlFor="email"
+              htmlFor="backlog"
               className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
             >
               Backlog
@@ -179,13 +193,13 @@ export default function NewUpsertIssueModal({
               className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
               {...register("backlog")}
             >
-              <option value="sprint">Sprint Backlog</option>
+              <option value="sprint">{sprint?.name} Backlog</option>
               <option value="product">Product Backlog</option>
             </select>
           </div>
           <div>
             <label
-              htmlFor="last_name"
+              htmlFor="userId"
               className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
             >
               Assignee
@@ -208,7 +222,7 @@ export default function NewUpsertIssueModal({
         <div className="mb-6 grid gap-6 md:grid-cols-3">
           <div>
             <label
-              htmlFor="company"
+              htmlFor="type"
               className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
             >
               Type
@@ -226,7 +240,7 @@ export default function NewUpsertIssueModal({
           </div>
           <div>
             <label
-              htmlFor="phone"
+              htmlFor="estimate"
               className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
             >
               Estimate
@@ -240,24 +254,25 @@ export default function NewUpsertIssueModal({
               {...register("estimate", { min: "0" })}
             />
           </div>
-          <div>
-            <label
-              htmlFor="phone"
-              className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Status
-            </label>
-            <select
-              id="status"
-              data-testid="status"
-              className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-              {...register("status")}
-            >
-              <option value="toDo">To Do</option>
-              <option value="inProgress">In Progress</option>
-              <option value="done">Done</option>
-            </select>
-          </div>
+          {backlog === "sprint" && (
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                Status
+              </label>
+              <select
+                id="status"
+                data-testid="status"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                {...register("status")}
+              >
+                {statuses.map((status) => (
+                  <option key={status.value} value={status.value}>
+                    {status.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
         <div className="mb-6">
           <label

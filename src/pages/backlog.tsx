@@ -25,6 +25,7 @@ import { api } from "~/utils/api";
 import { type UpdateIssueInputs } from "~/utils/types";
 import EditSprintButton from "~/components/backlog/EditSprintButton";
 import SuperJSON from "superjson";
+import { backlogContainers } from "~/utils/constants";
 
 export default function Backlog({
   dataIssues,
@@ -43,6 +44,7 @@ export default function Backlog({
   const [activeIssue, setActiveIssue] = useState<Issue | null>(null);
   const [activeContainer, setActiveContainer] = useState<string | null>(null);
   const [issues, setIssues] = useState<Issue[]>(dataIssues);
+  const [editMode, setEditMode] = useState(false);
   const currentTime = new Date().getTime();
   const currentSprint =
     sprints.find(
@@ -77,10 +79,12 @@ export default function Backlog({
   const updateIssue = (data: UpdateIssueInputs) => {
     const teamId = session?.user.teamId;
     if (!teamId) return;
-    if (data.backlog === "sprint") {
-      data.sprintId = selectedSprintId;
-    } else {
-      data.sprintId = null;
+    if (data.backlog) {
+      if (data.backlog === "sprint") {
+        data.sprintId = selectedSprintId;
+      } else {
+        data.sprintId = null;
+      }
     }
     updateMutation.mutate({
       ...data,

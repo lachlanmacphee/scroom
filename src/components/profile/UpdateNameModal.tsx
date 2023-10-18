@@ -33,10 +33,7 @@ export default function UpdateNameModal({
   });
 
   const onSubmit = (data: UserPartialSchema) => {
-    updateMutation.mutate(
-      { ...data, id: userID},
-      { onSuccess: endSubmit },
-    );
+    updateMutation.mutate({ ...data, id: userID }, { onSuccess: endSubmit });
   };
 
   const endSubmit = async () => {
@@ -45,13 +42,13 @@ export default function UpdateNameModal({
   };
 
   return (
-    <Modal title={"Update Name / Image "} onClose={onClose}>
+    <Modal title="Update Name / Image" onClose={onClose}>
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-4 p-4"
         id="upsert-name-form"
       >
-        <label className="font-bold dark:text-white text-m">Update Name</label>
+        <label className="text-m font-bold dark:text-white">Update Name</label>
         <input
           type="text"
           className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"

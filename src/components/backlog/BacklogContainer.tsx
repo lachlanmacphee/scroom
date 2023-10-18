@@ -20,9 +20,9 @@ function BacklogContainer({
   id,
   issues,
   teamUsers,
-  sprint,
   updateIssue,
   statuses,
+  sprint,
 }: ContainerProps) {
   const { setNodeRef } = useDroppable({
     id: id,
@@ -59,6 +59,7 @@ function BacklogContainer({
               teamUsers={teamUsers}
               updateIssue={updateIssue}
               statuses={statuses}
+              sprint={sprint}
             />
           ))}
         </div>
