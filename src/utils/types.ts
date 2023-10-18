@@ -9,6 +9,7 @@ export type PointsDict = Record<string, Points>;
 
 export type onClose = () => void;
 export type voidReturnFunc = () => void;
+export type clickHandlerFunc = (e:string) => void;
 
 export const issueFormSchema = z.object({
   summary: z.string(),
