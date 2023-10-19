@@ -91,7 +91,9 @@ export function convertToBurndownData(
 
   const sprintStartDate = currentSprint.startDate.getTime();
   const sprintEndDate = currentSprint.endDate.getTime();
-  const daysInSprint = Math.abs(sprintEndDate - sprintStartDate) / oneDayInMs;
+  const daysInSprint = Math.round(
+    Math.abs(sprintEndDate - sprintStartDate) / oneDayInMs,
+  );
 
   const issueCompletionTimes = issues.map((issue) =>
     issue.dateCompleted ? issue.dateCompleted.getTime() : 0,
