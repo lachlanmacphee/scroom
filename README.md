@@ -5,7 +5,7 @@ It was built by the following team during the FIT2101 project at Monash Universi
 1. Lachlan MacPhee
 2. Isabella Moffat
 3. Jack Moses
-4. Raphael Schwab
+4. Raphael Schwalb
 5. Max Fergie
 6. Levi Kogan
 
