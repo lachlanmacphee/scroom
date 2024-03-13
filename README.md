@@ -10,9 +10,9 @@ It was built by the following team during the FIT2101 project at Monash Universi
 6. Levi Kogan
 
 ## Development Environment Setup
-1. Create a PlanetScale database
+1. Create a MySQL database somewhere (or change the Prisma schema to Postgres, SQLite etc)
 2. Fill out the necessary environment variables using the example env
-    - Database URL can be grabbed from PlanetScale during config
+    - Database URL can be grabbed from your database provider, otherwise if hosting locally adjust the string to suit.
     - OAuth can be setup with Discord and Google
     - Add your email account details for magic links
 3. Run `npm install`
