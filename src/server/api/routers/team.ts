@@ -124,7 +124,7 @@ export const teamRouter = createTRPCRouter({
       const transporter = createTransport({
         pool: true,
         host: env.EMAIL_SERVER_HOST,
-        port: parseInt(env.EMAIL_SERVER_PORT),
+        port: env.EMAIL_SERVER_PORT,
         secure: true,
         auth: {
           user: env.EMAIL_FROM,
